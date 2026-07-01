@@ -6,11 +6,17 @@ implementation screenshot path: `D:/middle school/apps/student-web/output-direct
 
 mobile screenshot path: `D:/middle school/apps/student-web/output-direction2-task-mobile.png`
 
+practice screenshot path: `D:/middle school/apps/student-web/output-direction2-practice.png`
+
+mistake review screenshot path: `D:/middle school/apps/student-web/output-direction2-mistake.png`
+
+report screenshot path: `D:/middle school/apps/student-web/output-direction2-report.png`
+
 full-view comparison evidence: `D:/middle school/apps/student-web/direction2-comparison.png`
 
 viewport: 1440 x 1024 desktop, 390 x 844 mobile
 
-state: student has selected 110+ goal, completed initial diagnostic, and opened the linear-function task in hint mode.
+state: student has selected 110+ goal, completed initial diagnostic, opened the linear-function task in hint mode, then continued through practice, mistake review, and report.
 
 ## Findings
 
@@ -32,6 +38,8 @@ state: student has selected 110+ goal, completed initial diagnostic, and opened 
 - Expanded the graph module with mode tabs, legend, auxiliary line, point labels, known conditions, and voice transcript.
 - Added AI coach chat, hint chips, mistake diagnosis, knowledge review cards, voice controls, and task progress.
 - Tuned mobile mode tabs to stay single-line via horizontal scrolling.
+- Extended the same direction-2 product language to practice, mistake review, and report pages.
+- Restarted the Vite dev server after detecting a stale CSS bundle during browser screenshot QA.
 
 ## Verification
 
@@ -40,6 +48,7 @@ state: student has selected 110+ goal, completed initial diagnostic, and opened 
 - `apps/student-web`: `npm run build`
 - `apps/student-web`: `npm run test:e2e`
 - Local app responds at `http://127.0.0.1:5174/`.
+- Browser screenshots were captured with Microsoft Edge through Playwright at 1440 x 1024.
 
 ## Follow-up Polish
 

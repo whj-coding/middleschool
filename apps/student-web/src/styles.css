@@ -581,6 +581,195 @@ svg {
   background: linear-gradient(90deg, #10b981 0 62%, #e5eaf2 62% 100%);
 }
 
+.flow-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+.stage-main,
+.stage-coach {
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+}
+
+.stage-main {
+  padding: 28px;
+}
+
+.stage-coach {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.stage-copy {
+  max-width: 760px;
+  color: #263449;
+}
+
+.question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.question-meta span,
+.tag-cloud span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.answer-workspace {
+  display: grid;
+  grid-template-columns: 0.65fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.answer-workspace label {
+  display: grid;
+  gap: 8px;
+  color: #172033;
+  font-weight: 800;
+}
+
+.answer-workspace input,
+.answer-workspace textarea {
+  width: 100%;
+  border: 1px solid #d4deeb;
+  border-radius: 8px;
+  padding: 12px;
+  color: #172033;
+  background: #fbfdff;
+  font: inherit;
+}
+
+.answer-workspace textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.answer-actions.full {
+  justify-content: flex-end;
+}
+
+.coach-checklist {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfdff;
+}
+
+.coach-checklist span {
+  color: #334155;
+  font-size: 13px;
+}
+
+.mode-tabs.compact {
+  margin: 0;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+}
+
+.mode-tabs.compact button {
+  min-width: 0;
+  height: 44px;
+}
+
+.evidence-panel,
+.similar-task,
+.report-hero,
+.report-grid article {
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fbfdff;
+}
+
+.evidence-panel {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.evidence-panel p,
+.similar-task p {
+  margin-top: 8px;
+}
+
+.correction-path {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.correction-path div {
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.step-index {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  color: #fff;
+  background: #2563eb;
+  font-weight: 900;
+}
+
+.similar-task {
+  margin-bottom: 18px;
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.report-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.report-score {
+  display: grid;
+  place-items: center;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  color: #10b981;
+  background: radial-gradient(circle, #fff 0 50%, transparent 51%), conic-gradient(#10b981 0 42%, #e5eaf2 42% 100%);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .mic-button {
   min-width: 108px;
   min-height: 54px;
@@ -667,7 +856,11 @@ svg {
   }
 
   .condition-grid,
-  .graph-controls {
+  .graph-controls,
+  .flow-stage,
+  .answer-workspace,
+  .correction-path,
+  .report-grid {
     grid-template-columns: 1fr;
   }
 
