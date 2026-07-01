@@ -1,0 +1,154 @@
+:root {
+  font-family: Inter, "Microsoft YaHei", Arial, sans-serif;
+  color: #172033;
+  background: #f6f8fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f6f8fb;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 1px solid #d7dfec;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #24324a;
+  background: #fff;
+  cursor: pointer;
+}
+
+.primary {
+  border-color: #2563eb;
+  color: #fff;
+  background: #2563eb;
+}
+
+.app-shell {
+  width: min(1120px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.panel,
+.coach {
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  padding: 28px;
+  background: #fff;
+  box-shadow: 0 16px 50px rgba(32, 55, 90, 0.08);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #168a55;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-size: 34px;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-bottom: 12px;
+}
+
+p {
+  color: #4a5568;
+  line-height: 1.65;
+}
+
+.button-row,
+.duration-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.duration-row span,
+.hint-box,
+.diagnostic-card,
+.completion,
+.next-task {
+  display: block;
+  margin-top: 18px;
+  border: 1px solid #d7e5dc;
+  border-radius: 8px;
+  padding: 14px;
+  color: #16694a;
+  background: #eefaf3;
+}
+
+.next-task strong,
+.next-task span {
+  display: block;
+}
+
+.graph-card {
+  margin-top: 22px;
+}
+
+svg {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 12px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+label {
+  display: inline-grid;
+  gap: 6px;
+  margin: 12px 12px 0 0;
+  color: #334155;
+  font-weight: 700;
+}
+
+input {
+  width: 96px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .coach {
+    padding: 20px;
+  }
+}
