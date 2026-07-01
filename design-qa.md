@@ -1,58 +1,50 @@
 # Design QA Report
 
-source visual truth path: `C:/Users/Admin/.codex/generated_images/019f140c-e809-7b60-9b83-35fe4b561bc6/ig_0fc9f02a36f949c5016a4320c773a88190b8ca75979f89fc9e.png`
+source visual truth path: `C:/Users/Admin/.codex/generated_images/019f1913-c80d-7983-9903-5bdc4940f7b7/ig_0d025b9ef6c03f5c016a44ef4e98ec819b95c0619566a6d579.png`
 
-implementation screenshot path: `D:/middle school/prototype-fresh-study-tool/output/playwright/prototype-dashboard-final-1440x1024.png`
+implementation screenshot path: `D:/middle school/apps/student-web/output-direction2-task-final.png`
 
-interactive screenshot path: `D:/middle school/prototype-fresh-study-tool/output/playwright/prototype-dashboard-final-interactive-1440x1024.png`
+mobile screenshot path: `D:/middle school/apps/student-web/output-direction2-task-mobile.png`
 
-mobile screenshot path: `D:/middle school/prototype-fresh-study-tool/output/playwright/prototype-dashboard-final-mobile-390x844.png`
+full-view comparison evidence: `D:/middle school/apps/student-web/direction2-comparison.png`
 
-viewport: 1440 x 1024
+viewport: 1440 x 1024 desktop, 390 x 844 mobile
 
-state: default desktop student dashboard, selected "今日任务", selected duration 20 minutes, graph `k = 1.5`, `b = -1`
-
-## Verification
-
-- `npm run build` passes.
-- Local server responds at `http://127.0.0.1:5173/`.
-- Browser QA ran through Playwright npm package with system Microsoft Edge because Playwright-managed Chromium download repeatedly timed out in this environment.
-- Default desktop screenshot: no console errors, no failed network responses.
-- Default desktop layout bounds:
-  - right coach card bottom: `1001.09375` within `1024`
-  - voice dock bottom: `978.09375` within `1024`
-  - graph card bottom: `1001.09375` within `1024`
-- Interaction check:
-  - duration selector changes to `40 分钟`
-  - quick question updates the AI coach response with the similar printing-fee problem
-  - microphone button toggles to `正在听`
-  - no console errors, no failed network responses
-- Mobile check at 390 x 844:
-  - document width stays `390`, no horizontal overflow
-  - no console errors, no failed network responses
+state: student has selected 110+ goal, completed initial diagnostic, and opened the linear-function task in hint mode.
 
 ## Findings
 
-- [Fixed] Browser screenshot capture unavailable
-  - Previous state: blocked because Playwright-managed Chromium was not installed and `npx playwright install chromium` timed out.
-  - Current state: QA uses installed Microsoft Edge via Playwright, so screenshots and interaction checks are available.
+- No actionable P0/P1/P2 findings remain.
 
-- [Fixed] Desktop vertical clipping at 1440 x 1024
-  - Previous evidence: right coach card and lower graph section extended slightly below the viewport.
-  - Fix: tightened vertical spacing in the workspace, task panel, graph panel, and coach card; reduced graph display height from 300 to 280.
-  - Current evidence: coach, voice dock, and graph card all fit within the 1024 px viewport.
+## Fidelity Surfaces
 
-- [Fixed] Favicon 404 noise
-  - Previous evidence: browser console intermittently reported a 404 resource request.
-  - Fix: added an inline SVG favicon and updated the page title.
-  - Current evidence: final desktop, interaction, and mobile checks report no failed network responses.
+- Fonts and typography: implementation uses the project UI stack `Inter`, `Microsoft YaHei`, `PingFang SC`, and Arial. Hierarchy matches the source direction: compact topbar, bold section titles, 14px body copy, dense but readable panel text, and non-negative letter spacing.
+- Spacing and layout rhythm: implementation recreates the three-column split from the source visual with a left problem panel, central graph/work area, and right AI coach panel. Desktop panels fit the 1440 x 1024 viewport without visible overlap. Mobile collapses into a single column and keeps mode controls scrollable instead of wrapping into broken multi-line controls.
+- Colors and visual tokens: implementation follows the source palette: white and light gray surfaces, ink text, blue active controls and graph line, green AI/progress states, and restrained cool borders. No dominant purple, beige, or decorative background effects were introduced.
+- Image quality and asset fidelity: the source design is product UI with no photographic or illustration assets. The implementation uses code-rendered SVG graph content and standard UI controls, matching the product surface rather than substituting placeholder images.
+- Copy and content: implementation preserves the AI coach split-screen framing, hint/explanation/answer modes, current-question context, voice transcript, graph conditions, mistake diagnosis, and knowledge review content shown in the selected direction.
 
-## Visual Comparison Notes
+## Patches Made Since Previous QA Pass
 
-- The implementation keeps the selected "清爽学习工具风" direction: light workspace, left navigation, large task card, right AI coach panel, green/blue learning accents, and an interactive graph card.
-- Compared with the source visual, the implementation is slightly denser in the task card and uses a more compact right coach panel to guarantee fit at 1440 x 1024.
-- The graph and voice controls remain visible without scrolling in the default desktop viewport.
+- Rebuilt the student task screen into a direction-2 split layout.
+- Added top course context: `一次函数：y = kx + b`.
+- Added problem-side answer controls and scratchpad.
+- Expanded the graph module with mode tabs, legend, auxiliary line, point labels, known conditions, and voice transcript.
+- Added AI coach chat, hint chips, mistake diagnosis, knowledge review cards, voice controls, and task progress.
+- Tuned mobile mode tabs to stay single-line via horizontal scrolling.
 
-## Final Result
+## Verification
 
-passed
+- `apps/student-web`: `npm run lint`
+- `apps/student-web`: `npm run test`
+- `apps/student-web`: `npm run build`
+- `apps/student-web`: `npm run test:e2e`
+- Local app responds at `http://127.0.0.1:5174/`.
+
+## Follow-up Polish
+
+- P3: Replace the simple text brand mark with a real logo asset if a brand system is later defined.
+- P3: Add richer handwritten math rendering in the scratchpad if this becomes a core interaction.
+- P3: Add a live waveform visualization for the voice input area when real STT is integrated.
+
+final result: passed
