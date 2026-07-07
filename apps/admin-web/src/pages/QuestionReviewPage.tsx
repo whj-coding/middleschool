@@ -41,6 +41,15 @@ export function QuestionReviewPage({ onNext }: { onNext: () => void }) {
       <div className="tag-row" aria-label="题目标签">
         {reviewQueue.question.tags.map((tag) => <span key={tag}>{tag}</span>)}
       </div>
+      <div className="review-block">
+        <h3>内容单元候选</h3>
+        <p className="note">已审核内容单元可进入学习包编排；待审核内容不会出现在学生端。</p>
+        <div className="tag-row">
+          <span>unit-linear-kb-concept</span>
+          <span>k/b意义</span>
+          <span>基础</span>
+        </div>
+      </div>
       <p className="sync-status">{syncStatus}</p>
       <button type="button" onClick={handleApprove}>题目审核通过</button>
     </section>

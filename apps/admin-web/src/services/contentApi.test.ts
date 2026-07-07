@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { approveQuestion, importMarkdownQuestion, publishQuestion } from "./contentApi";
+import { approveQuestion, fetchContentUnitPackage, importMarkdownQuestion, publishQuestion } from "./contentApi";
 
 describe("contentApi", () => {
   afterEach(() => {
@@ -33,5 +33,17 @@ describe("contentApi", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/admin/questions/MATH-FUNC-LINEAR-001/publish", expect.objectContaining({ method: "POST" }));
     expect(approved.reviewStatus).toBe("approved");
     expect(published.reviewStatus).toBe("published");
+  });
+
+  it("fetches content unit package candidates", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ units: [{ id: "unit-linear-kb-concept", contentMarkdown: "k 表示单位变化量" }] }),
+    });
+
+    const result = await fetchContentUnitPackage(fetchMock);
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/admin/data-pipeline/content-units/package?knowledgeTag=k%2Fb%E6%84%8F%E4%B9%89&difficulty=%E5%9F%BA%E7%A1%80&ability=%E6%A6%82%E5%BF%B5");
+    expect(result.units[0].id).toBe("unit-linear-kb-concept");
   });
 });
