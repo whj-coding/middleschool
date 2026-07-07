@@ -11,6 +11,7 @@
 - [ ] Student can choose 10, 20, or 40 minute duration.
 - [ ] Student can interact with k and b graph controls.
 - [ ] Student can submit a practice answer.
+- [ ] 练习提交页展示可记录的交互日志意图：`submit_answer`、题目 ID、提示层级。
 - [ ] Student receives hint mode before answer mode.
 - [ ] Student receives mistake reason after a wrong answer.
 - [ ] Student receives a next task after report generation.

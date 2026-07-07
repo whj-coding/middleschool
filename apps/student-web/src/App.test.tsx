@@ -14,6 +14,7 @@ describe("App learning flow", () => {
     expect(screen.getByText("理解 k 和 b 的意义")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "进入练习" }));
+    expect(screen.getByText("将记录：submit_answer")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "提交答案" }));
 
     expect(screen.getByText("审题与建模错误")).toBeInTheDocument();

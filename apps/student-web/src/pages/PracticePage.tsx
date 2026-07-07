@@ -35,6 +35,10 @@ export function PracticePage({ onSubmit }: Props) {
           <button>重新录入</button>
         </div>
 
+        <div className="sync-status">
+          <span>将记录：submit_answer</span> · questionId=practice-printing-fee · hintLevel=1
+        </div>
+
         <div className="answer-actions full">
           <button>保存思路</button>
           <button className="primary" onClick={onSubmit}>
