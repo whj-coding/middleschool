@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { registerAuthRoutes } from "./modules/auth/routes.js";
 import { createInMemoryContentRepository } from "./modules/content/repository.js";
 import { registerContentRoutes } from "./modules/content/routes.js";
+import { registerDataPipelineRoutes } from "./modules/data-pipeline/routes.js";
 import { createInMemoryLearningRepository } from "./modules/learning/repository.js";
 import { registerLearningRoutes } from "./modules/learning/routes.js";
 import { registerVoiceRoutes } from "./modules/voice/voiceRoutes.js";
@@ -24,5 +25,6 @@ export function buildServer() {
   app.register((instance) => registerLearningRoutes(instance, repository));
   app.register(registerVoiceRoutes);
   app.register((instance) => registerContentRoutes(instance, contentRepository));
+  app.register(registerDataPipelineRoutes);
   return app;
 }
