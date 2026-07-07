@@ -45,8 +45,29 @@ export async function registerDataPipelineRoutes(app: FastifyInstance) {
     qualityScore: 0.95,
     usageCount: 0,
   });
+  repository.saveContentUnit({
+    id: "unit-linear-scenario",
+    chunkType: "scenario",
+    contentMarkdown: "打印店总费用可以拆成固定服务费和每页变化费用。",
+    knowledgeTags: ["一次函数", "打印费建模"],
+    difficulty: "基础",
+    ability: "应用",
+    errorTypes: ["审题与建模错误"],
+    reviewStatus: "pending_review",
+    qualityScore: 0.88,
+    usageCount: 0,
+  });
 
   const service = createDataPipelineService(repository);
+
+  app.get("/admin/data-pipeline/content-units", async () => service.listContentUnits());
+
+  app.post("/admin/data-pipeline/content-units/:unitId/approve", async (request, reply) => {
+    const { unitId } = request.params as { unitId: string };
+    const unit = service.approveContentUnit(unitId);
+    if (!unit) return reply.code(404).send({ error: "content_unit_not_found" });
+    return unit;
+  });
 
   app.get("/admin/data-pipeline/content-units/package", async (request) => {
     const query = packageQuerySchema.parse(request.query);

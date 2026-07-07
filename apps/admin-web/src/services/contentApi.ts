@@ -7,6 +7,15 @@ export type ContentUnitPackage = {
   units: Array<{ id: string; contentMarkdown: string }>;
 };
 
+export type ContentUnitSummary = {
+  id: string;
+  reviewStatus: "pending_review" | "needs_revision" | "approved" | "rejected";
+};
+
+export type ContentUnitList = {
+  units: ContentUnitSummary[];
+};
+
 async function readJson<T>(response: Response): Promise<T> {
   if (!response.ok) throw new Error(`Content API failed with ${response.status}`);
   return response.json() as Promise<T>;
@@ -41,4 +50,18 @@ export async function fetchContentUnitPackage(fetcher: typeof fetch = fetch): Pr
   );
   if (!response.ok) throw new Error("Failed to fetch content unit package");
   return response.json() as Promise<ContentUnitPackage>;
+}
+
+export async function fetchContentUnits(fetcher: typeof fetch = fetch): Promise<ContentUnitList> {
+  const response = await fetcher("/api/admin/data-pipeline/content-units");
+  if (!response.ok) throw new Error("Failed to fetch content units");
+  return response.json() as Promise<ContentUnitList>;
+}
+
+export async function approveContentUnit(unitId: string, fetcher: typeof fetch = fetch): Promise<ContentUnitSummary> {
+  const response = await fetcher(`/api/admin/data-pipeline/content-units/${unitId}/approve`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Failed to approve content unit");
+  return response.json() as Promise<ContentUnitSummary>;
 }

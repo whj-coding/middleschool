@@ -30,6 +30,14 @@ export function createDataPipelineService(repository: Repository) {
 
       return { units };
     },
+    listContentUnits() {
+      return { units: repository.listContentUnits() };
+    },
+    approveContentUnit(unitId: string) {
+      const unit = repository.findContentUnit(unitId);
+      if (!unit) return null;
+      return repository.updateContentUnit({ ...unit, reviewStatus: "approved" });
+    },
     recordInteraction(input: RecordInteractionInput): InteractionLog {
       const log: InteractionLog = {
         id: `interaction-${Date.now()}`,

@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { approveQuestion, fetchContentUnitPackage, importMarkdownQuestion, publishQuestion } from "./contentApi";
+import {
+  approveContentUnit,
+  approveQuestion,
+  fetchContentUnitPackage,
+  fetchContentUnits,
+  importMarkdownQuestion,
+  publishQuestion,
+} from "./contentApi";
 
 describe("contentApi", () => {
   afterEach(() => {
@@ -45,5 +52,26 @@ describe("contentApi", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("/api/admin/data-pipeline/content-units/package?knowledgeTag=k%2Fb%E6%84%8F%E4%B9%89&difficulty=%E5%9F%BA%E7%A1%80&ability=%E6%A6%82%E5%BF%B5");
     expect(result.units[0].id).toBe("unit-linear-kb-concept");
+  });
+
+  it("lists and approves content units", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ units: [{ id: "unit-linear-scenario", reviewStatus: "pending_review" }] }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: "unit-linear-scenario", reviewStatus: "approved" }),
+      });
+
+    const units = await fetchContentUnits(fetchMock);
+    const approved = await approveContentUnit("unit-linear-scenario", fetchMock);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/admin/data-pipeline/content-units");
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/admin/data-pipeline/content-units/unit-linear-scenario/approve", expect.objectContaining({ method: "POST" }));
+    expect(units.units[0].reviewStatus).toBe("pending_review");
+    expect(approved.reviewStatus).toBe("approved");
   });
 });
