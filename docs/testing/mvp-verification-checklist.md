@@ -60,3 +60,9 @@
 - [ ] Student task page has no horizontal overflow at 390 px width.
 - [ ] Graph, formula, practice answer, and AI coach text do not overlap.
 - [ ] Primary actions remain reachable without hiding voice controls.
+
+## 数据管线补充检查
+
+- [ ] 未审核内容单元不会出现在学生端学习包。
+- [ ] 学生提交答案和请求提示会生成交互日志。
+- [ ] 内容单元审核状态变化后，后台和学习包编排结果一致。
