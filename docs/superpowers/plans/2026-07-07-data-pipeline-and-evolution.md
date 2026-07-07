@@ -65,7 +65,7 @@
   - `interaction_logs`
   - `prompt_templates`
 
-- [ ] **Step 1: Create schema file**
+- [x] **Step 1: Create schema file**
 
 Create `services/api/src/db/data-pipeline-schema.sql` with:
 
@@ -173,7 +173,7 @@ CREATE TABLE prompt_templates (
 );
 ```
 
-- [ ] **Step 2: Update migration entry**
+- [x] **Step 2: Update migration entry**
 
 Modify `services/api/src/db/migrate.ts` so the schema application order is:
 
@@ -183,7 +183,7 @@ const schemaFiles = ["schema.sql", "content-schema.sql", "data-pipeline-schema.s
 
 Use the existing file-reading pattern in `migrate.ts`.
 
-- [ ] **Step 3: Verify schema file is included**
+- [x] **Step 3: Verify schema file is included**
 
 Run:
 
@@ -195,7 +195,7 @@ from `services/api`.
 
 Expected: TypeScript build exits with code 0.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add services/api/src/db/data-pipeline-schema.sql services/api/src/db/migrate.ts
@@ -219,7 +219,7 @@ git commit -m "feat(api): add data pipeline schema"
   - `service.composeLearningPackage(input)`
   - `service.recordInteraction(input)`
 
-- [ ] **Step 1: Write failing service tests**
+- [x] **Step 1: Write failing service tests**
 
 Create `services/api/src/modules/data-pipeline/service.test.ts`:
 
@@ -285,7 +285,7 @@ describe("data pipeline service", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify failure**
+- [x] **Step 2: Run tests to verify failure**
 
 Run:
 
@@ -297,7 +297,7 @@ from `services/api`.
 
 Expected: FAIL because `repository.js` and `service.js` do not exist.
 
-- [ ] **Step 3: Add types**
+- [x] **Step 3: Add types**
 
 Create `services/api/src/modules/data-pipeline/types.ts`:
 
@@ -351,7 +351,7 @@ export type ComposeLearningPackageInput = {
 };
 ```
 
-- [ ] **Step 4: Add repository**
+- [x] **Step 4: Add repository**
 
 Create `services/api/src/modules/data-pipeline/repository.ts`:
 
@@ -381,7 +381,7 @@ export function createDataPipelineRepository() {
 }
 ```
 
-- [ ] **Step 5: Add service**
+- [x] **Step 5: Add service**
 
 Create `services/api/src/modules/data-pipeline/service.ts`:
 
@@ -441,7 +441,7 @@ export function createDataPipelineService(repository: Repository) {
 }
 ```
 
-- [ ] **Step 6: Run service tests**
+- [x] **Step 6: Run service tests**
 
 Run:
 
@@ -451,7 +451,7 @@ npm run test -- src/modules/data-pipeline/service.test.ts
 
 Expected: PASS, 2 tests.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add services/api/src/modules/data-pipeline
@@ -470,7 +470,7 @@ git commit -m "feat(api): add data pipeline domain service"
   - `GET /admin/data-pipeline/content-units/package`
   - `POST /student/interactions`
 
-- [ ] **Step 1: Write failing route tests**
+- [x] **Step 1: Write failing route tests**
 
 Create `services/api/src/modules/data-pipeline/routes.test.ts`:
 
@@ -512,7 +512,7 @@ describe("data pipeline routes", () => {
 });
 ```
 
-- [ ] **Step 2: Run route tests to verify failure**
+- [x] **Step 2: Run route tests to verify failure**
 
 Run:
 
@@ -522,7 +522,7 @@ npm run test -- src/modules/data-pipeline/routes.test.ts
 
 Expected: FAIL with 404 for new routes.
 
-- [ ] **Step 3: Add routes**
+- [x] **Step 3: Add routes**
 
 Create `services/api/src/modules/data-pipeline/routes.ts`:
 
@@ -573,7 +573,7 @@ export async function registerDataPipelineRoutes(app: FastifyInstance) {
 }
 ```
 
-- [ ] **Step 4: Register routes**
+- [x] **Step 4: Register routes**
 
 Modify `services/api/src/server.ts`:
 
@@ -587,7 +587,7 @@ Inside `buildServer()` after existing route registration:
 void app.register(registerDataPipelineRoutes);
 ```
 
-- [ ] **Step 5: Run route tests**
+- [x] **Step 5: Run route tests**
 
 Run:
 
@@ -597,7 +597,7 @@ npm run test -- src/modules/data-pipeline/routes.test.ts
 
 Expected: PASS, 2 tests.
 
-- [ ] **Step 6: Run API test suite**
+- [x] **Step 6: Run API test suite**
 
 Run:
 
@@ -609,7 +609,7 @@ from `services/api`.
 
 Expected: all tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add services/api/src/modules/data-pipeline services/api/src/server.ts
@@ -627,7 +627,7 @@ git commit -m "feat(api): expose data pipeline routes"
 - Consumes: `GET /admin/data-pipeline/content-units/package`
 - Produces: `fetchContentUnitPackage()`
 
-- [ ] **Step 1: Write failing client test**
+- [x] **Step 1: Write failing client test**
 
 Modify `apps/admin-web/src/services/contentApi.test.ts`:
 
@@ -647,7 +647,7 @@ it("fetches content unit package candidates", async () => {
 
 Import `fetchContentUnitPackage` from `./contentApi`.
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
 
 Run:
 
@@ -659,7 +659,7 @@ from `apps/admin-web`.
 
 Expected: FAIL because `fetchContentUnitPackage` is not exported.
 
-- [ ] **Step 3: Add client method**
+- [x] **Step 3: Add client method**
 
 Modify `apps/admin-web/src/services/contentApi.ts`:
 
@@ -677,7 +677,7 @@ export async function fetchContentUnitPackage(fetcher: typeof fetch = fetch): Pr
 }
 ```
 
-- [ ] **Step 4: Add admin page section**
+- [x] **Step 4: Add admin page section**
 
 Modify `apps/admin-web/src/pages/QuestionReviewPage.tsx` to include a static review block near the existing question fields:
 
@@ -693,7 +693,7 @@ Modify `apps/admin-web/src/pages/QuestionReviewPage.tsx` to include a static rev
 </div>
 ```
 
-- [ ] **Step 5: Run admin tests**
+- [x] **Step 5: Run admin tests**
 
 Run:
 
@@ -706,7 +706,7 @@ from `apps/admin-web`.
 
 Expected: tests and build pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/admin-web/src/services/contentApi.ts apps/admin-web/src/services/contentApi.test.ts apps/admin-web/src/pages/QuestionReviewPage.tsx
@@ -724,7 +724,7 @@ git commit -m "feat(admin): show content unit review context"
 - Consumes interaction payload shape from Task 3.
 - Produces visible prototype evidence that the practice submit action is loggable.
 
-- [ ] **Step 1: Add failing UI test assertion**
+- [x] **Step 1: Add failing UI test assertion**
 
 Modify `apps/student-web/src/App.test.tsx` after navigating to the practice page and before clicking submit:
 
@@ -732,7 +732,7 @@ Modify `apps/student-web/src/App.test.tsx` after navigating to the practice page
 expect(screen.getByText("将记录：submit_answer")).toBeInTheDocument();
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
 
 Run:
 
@@ -744,7 +744,7 @@ from `apps/student-web`.
 
 Expected: FAIL because the text is not rendered.
 
-- [ ] **Step 3: Add visible interaction payload evidence**
+- [x] **Step 3: Add visible interaction payload evidence**
 
 Modify `apps/student-web/src/pages/PracticePage.tsx` inside the practice main panel:
 
@@ -756,7 +756,7 @@ Modify `apps/student-web/src/pages/PracticePage.tsx` inside the practice main pa
 
 Place it above the submit button row.
 
-- [ ] **Step 4: Update verification checklist**
+- [x] **Step 4: Update verification checklist**
 
 Add to `docs/testing/mvp-verification-checklist.md`:
 
@@ -764,7 +764,7 @@ Add to `docs/testing/mvp-verification-checklist.md`:
 - [ ] 练习提交页展示可记录的交互日志意图：`submit_answer`、题目 ID、提示层级。
 ```
 
-- [ ] **Step 5: Run student tests**
+- [x] **Step 5: Run student tests**
 
 Run:
 
@@ -778,7 +778,7 @@ from `apps/student-web`.
 
 Expected: all tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/student-web/src/pages/PracticePage.tsx apps/student-web/src/App.test.tsx docs/testing/mvp-verification-checklist.md
@@ -794,7 +794,7 @@ git commit -m "feat(student): surface interaction logging intent"
 **Interfaces:**
 - Consumes: `docs/technical/2026-07-07-data-pipeline-and-evolution.md`
 
-- [ ] **Step 1: Add architecture reference**
+- [x] **Step 1: Add architecture reference**
 
 Append to `docs/technical/2026-06-30-mvp-technical-architecture.md` under `## 11. 下一步`:
 
@@ -802,7 +802,7 @@ Append to `docs/technical/2026-06-30-mvp-technical-architecture.md` under `## 11
 6. 数据管线、PDF 资料管理、内容单元、交互日志和系统进化机制见 `docs/technical/2026-07-07-data-pipeline-and-evolution.md`。
 ```
 
-- [ ] **Step 2: Add checklist reference**
+- [x] **Step 2: Add checklist reference**
 
 Append to `docs/testing/mvp-verification-checklist.md`:
 
@@ -814,13 +814,13 @@ Append to `docs/testing/mvp-verification-checklist.md`:
 - [ ] 内容单元审核状态变化后，后台和学习包编排结果一致。
 ```
 
-- [ ] **Step 3: Verify documentation contains no placeholders**
+- [x] **Step 3: Verify documentation contains no placeholders**
 
 Run a repository text search over `docs/technical/2026-07-07-data-pipeline-and-evolution.md` and `docs/superpowers/plans/2026-07-07-data-pipeline-and-evolution.md` for placeholder markers before committing.
 
 Expected: no placeholder marker output.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/technical/2026-06-30-mvp-technical-architecture.md docs/testing/mvp-verification-checklist.md
