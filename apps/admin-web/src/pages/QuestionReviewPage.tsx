@@ -1,9 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { reviewQueue } from "../data/mockReviewQueue";
-import { approveQuestion } from "../services/contentApi";
+import { approveContentUnit, approveQuestion, fetchContentUnits, type ContentUnitSummary } from "../services/contentApi";
 
 export function QuestionReviewPage({ onNext }: { onNext: () => void }) {
   const [syncStatus, setSyncStatus] = useState("待同步");
+  const [contentUnits, setContentUnits] = useState<ContentUnitSummary[]>([
+    { id: "unit-linear-kb-concept", reviewStatus: "approved" },
+  ]);
+
+  useEffect(() => {
+    let active = true;
+    fetchContentUnits()
+      .then((result) => {
+        if (active) setContentUnits(result.units);
+      })
+      .catch(() => {
+        if (active) setSyncStatus("内容单元 API 未连接：使用本地候选");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleApproveContentUnit(unitId: string) {
+    try {
+      const unit = await approveContentUnit(unitId);
+      setContentUnits((units) => units.map((item) => item.id === unit.id ? unit : item));
+      setSyncStatus(`内容单元同步：${unit.reviewStatus}`);
+    } catch {
+      setSyncStatus("内容单元 API 未连接：使用本地审核流");
+    }
+  }
 
   async function handleApprove() {
     try {
@@ -45,10 +72,18 @@ export function QuestionReviewPage({ onNext }: { onNext: () => void }) {
         <h3>内容单元候选</h3>
         <p className="note">已审核内容单元可进入学习包编排；待审核内容不会出现在学生端。</p>
         <div className="tag-row">
-          <span>unit-linear-kb-concept</span>
-          <span>k/b意义</span>
-          <span>基础</span>
+          {contentUnits.map((unit) => (
+            <span key={unit.id}>
+              <strong>{unit.id}</strong>
+              <small>{unit.reviewStatus}</small>
+            </span>
+          ))}
         </div>
+        {contentUnits.map((unit) => (
+          <button key={unit.id} type="button" onClick={() => void handleApproveContentUnit(unit.id)}>
+            审核内容单元 {unit.id}
+          </button>
+        ))}
       </div>
       <p className="sync-status">{syncStatus}</p>
       <button type="button" onClick={handleApprove}>题目审核通过</button>
