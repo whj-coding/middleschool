@@ -272,3 +272,4 @@ flowchart TD
 3. 建立一次函数样例题库和审核状态种子数据。
 4. 用 mock AI 跑通提示、讲解、答案、诊断和报告输出模板。
 5. 完成端到端验证后再接入真实模型、OCR、STT 和 TTS。
+6. 数据管线、PDF 资料管理、内容单元、交互日志和系统进化机制见 `docs/technical/2026-07-07-data-pipeline-and-evolution.md`。
