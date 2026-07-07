@@ -1,8 +1,27 @@
+import { recordInteraction } from "../services/interactionApi";
+
 type Props = {
   onSubmit: () => void;
 };
 
 export function PracticePage({ onSubmit }: Props) {
+  async function handleSubmit() {
+    try {
+      await recordInteraction({
+        studentId: "student-demo",
+        taskId: "task-linear-kb",
+        questionId: "practice-printing-fee",
+        action: "submit_answer",
+        studentAnswer: "y = 3x + 0.4",
+        hintLevel: 1,
+        correct: false,
+      });
+    } catch {
+      // Prototype continues the local learning flow when the API is unavailable.
+    }
+    onSubmit();
+  }
+
   return (
     <section className="flow-stage practice-stage">
       <div className="stage-main">
@@ -41,7 +60,7 @@ export function PracticePage({ onSubmit }: Props) {
 
         <div className="answer-actions full">
           <button>保存思路</button>
-          <button className="primary" onClick={onSubmit}>
+          <button className="primary" onClick={() => void handleSubmit()}>
             提交答案
           </button>
         </div>
