@@ -17,7 +17,12 @@ describe("LinearFunctionTaskPage", () => {
             {
               id: "unit-linear-kb-concept",
               chunkType: "concept",
-              contentMarkdown: "k 表示单位变化量，b 表示初始量。",
+              contentMarkdown: [
+                "## k 和 b 怎么看",
+                "k 表示单位变化量，b 表示初始量。",
+                "$$y = kx + b$$",
+                "![一次函数图像](images/linear-kb-concept.png)",
+              ].join("\n"),
               knowledgeTags: ["一次函数", "k/b意义"],
               difficulty: "基础",
               ability: "概念",
@@ -32,7 +37,9 @@ describe("LinearFunctionTaskPage", () => {
     render(<LinearFunctionTaskPage onPractice={() => undefined} />);
 
     expect(await screen.findByText("已审核学习材料")).toBeInTheDocument();
-    expect(screen.getByText("k 表示单位变化量，b 表示初始量。")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "k 和 b 怎么看" })).toBeInTheDocument();
+    expect(screen.getByLabelText("公式 y = kx + b")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "一次函数图像" })).toHaveAttribute("src", "images/linear-kb-concept.png");
     expect(fetch).toHaveBeenCalledWith(
       "/api/student/learning-package?knowledgeTag=k%2Fb%E6%84%8F%E4%B9%89&difficulty=%E5%9F%BA%E7%A1%80&ability=%E6%A6%82%E5%BF%B5",
     );
