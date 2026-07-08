@@ -74,4 +74,20 @@ describe("learning service", () => {
       status: "completed",
     });
   });
+
+  it("keeps reporting the latest completed task when a newer task has only started", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.startTask("student-1", "task-completed");
+    service.submitPracticeAnswer("student-1", "task-completed", "practice-printing-fee", "y = 3x + 0.4");
+    service.startTask("student-1", "task-started");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.activeTask).toEqual({
+      studentId: "student-1",
+      taskId: "task-completed",
+      status: "completed",
+    });
+  });
 });

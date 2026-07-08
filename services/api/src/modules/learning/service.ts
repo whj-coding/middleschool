@@ -62,7 +62,7 @@ export function createLearningService(repository: LearningRepository) {
     getLatestReport(studentId: string) {
       const studentMistakes = repository.listMistakes(studentId);
       if (studentMistakes.length === 0) return null;
-      const activeTask = repository.listTasks(studentId).at(-1) ?? null;
+      const activeTask = repository.listTasks(studentId).filter((task) => task.status === "completed").at(-1) ?? null;
       const nextTask = { id: "task-linear-modeling", title: "从打印费理解固定费用和变化费用" };
       const structuredReport = generateStructuredReport({
         correctRate: 0.5,

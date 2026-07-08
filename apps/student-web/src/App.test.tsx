@@ -133,5 +133,12 @@ describe("App learning flow", () => {
       .map(([, init]) => JSON.parse((init as RequestInit).body as string));
     expect(interactionBodies[0].taskId).toBe("task-linear-kb");
     expect(interactionBodies[1].taskId).toBe("task-linear-modeling");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/tasks/task-linear-modeling/start",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ studentId: "student-demo" }),
+      }),
+    );
   });
 });

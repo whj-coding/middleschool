@@ -58,6 +58,13 @@ test("student completes the linear-function learning slice", async ({ page }) =>
       body: JSON.stringify({ studentId: "student-demo", taskId: "task-linear-kb", status: "started" }),
     });
   });
+  await page.route("**/api/tasks/task-linear-modeling/start", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ studentId: "student-demo", taskId: "task-linear-modeling", status: "started" }),
+    });
+  });
   await page.route("**/api/student/learning-package**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -135,7 +142,7 @@ test("student completes the linear-function learning slice", async ({ page }) =>
   await expect(page.getByText("错题复练候选")).toBeVisible();
   await expect(page.getByText("practice-printing-fee")).toBeVisible();
   await page.getByRole("button", { name: "开始推荐练习" }).click();
-  await expect(page.getByText("从打印费理解固定费用和变化费用")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "从打印费理解固定费用和变化费用" })).toBeVisible();
   await page.getByRole("button", { name: "进入练习" }).click();
   await expect(page.getByText("打印费建模")).toBeVisible();
 

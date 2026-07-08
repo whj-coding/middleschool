@@ -7,6 +7,7 @@ import { MistakeReviewPage } from "./pages/MistakeReviewPage";
 import { PracticePage } from "./pages/PracticePage";
 import { ReportPage } from "./pages/ReportPage";
 import { TodayTaskPage } from "./pages/TodayTaskPage";
+import { startTask } from "./services/taskStartApi";
 import { createInitialLearningState, learningReducer } from "./state/learningFlow";
 import type { TodayTask } from "./services/todayTaskApi";
 import "./styles.css";
@@ -32,6 +33,16 @@ function createRecommendedTask(task: { id: string; title: string }): TodayTask {
 function App() {
   const [state, dispatch] = useReducer(learningReducer, undefined, createInitialLearningState);
   const latestMistake = state.mistakes[0];
+
+  async function handleStartNextTask(task: { id: string; title: string }) {
+    const recommendedTask = createRecommendedTask(task);
+    try {
+      await startTask(recommendedTask.id);
+    } catch {
+      // Prototype can continue when the API is unavailable.
+    }
+    dispatch({ type: "startTask", task: recommendedTask });
+  }
 
   return (
     <div className="app-frame">
@@ -77,7 +88,7 @@ function App() {
         {state.currentPage === "report" && (
           <ReportPage
             onRetryPractice={(questionId, taskId) => dispatch({ type: "startRetryPractice", questionId, taskId })}
-            onStartNextTask={(task) => dispatch({ type: "startTask", task: createRecommendedTask(task) })}
+            onStartNextTask={(task) => void handleStartNextTask(task)}
           />
         )}
       </main>
