@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { evaluateDiagnostic } from "./diagnosticAgent.js";
-import { generateReportSummary } from "./reportAgent.js";
+import { generateReportSummary, generateStructuredReport } from "./reportAgent.js";
 import { recommendTask } from "./taskRecommendationAgent.js";
 
 describe("learning AI agents", () => {
@@ -19,6 +19,21 @@ describe("learning AI agents", () => {
 
     expect(diagnostic.weakPoints).toContain("图像理解");
     expect(task.title).toBe("理解 k 和 b 的意义");
+    expect(task.taskContent).toContain("图像探索");
+    expect(task.completionStandard).toContain("y = kx + b");
     expect(report).toContain("下一步");
+  });
+
+  it("generates structured report copy for student UI", () => {
+    const report = generateStructuredReport({
+      correctRate: 0.5,
+      progress: "能说出 k 影响直线方向。",
+      weakPoints: ["应用建模"],
+      mistakeReason: "审题与建模错误",
+      nextTaskTitle: "从打印费理解固定费用和变化费用",
+    });
+
+    expect(report.summary).toContain("从打印费理解固定费用和变化费用");
+    expect(report.recommendationReasons).toContain("应用建模 · 需加强");
   });
 });

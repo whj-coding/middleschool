@@ -1,20 +1,34 @@
 import { recordInteraction } from "../services/interactionApi";
+import { submitPracticeAnswer } from "../services/practiceApi";
 
 type Props = {
   onSubmit: () => void;
+  taskId: string;
+  questionId?: string;
 };
 
-export function PracticePage({ onSubmit }: Props) {
+export function PracticePage({ onSubmit, taskId, questionId = "practice-printing-fee" }: Props) {
   async function handleSubmit() {
     try {
       await recordInteraction({
         studentId: "student-demo",
-        taskId: "task-linear-kb",
-        questionId: "practice-printing-fee",
+        taskId,
+        questionId,
         action: "submit_answer",
         studentAnswer: "y = 3x + 0.4",
         hintLevel: 1,
         correct: false,
+      });
+    } catch {
+      // Prototype continues the local learning flow when the API is unavailable.
+    }
+    try {
+      await submitPracticeAnswer({
+        sessionId: "practice-1",
+        studentId: "student-demo",
+        taskId,
+        questionId,
+        answer: "y = 3x + 0.4",
       });
     } catch {
       // Prototype continues the local learning flow when the API is unavailable.
@@ -55,7 +69,7 @@ export function PracticePage({ onSubmit }: Props) {
         </div>
 
         <div className="sync-status">
-          <span>将记录：submit_answer</span> · questionId=practice-printing-fee · hintLevel=1
+          <span>将记录：submit_answer</span> · questionId={questionId} · hintLevel=1
         </div>
 
         <div className="answer-actions full">

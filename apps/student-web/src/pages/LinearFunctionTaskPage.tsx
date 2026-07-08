@@ -1,11 +1,34 @@
+import { useEffect, useState } from "react";
 import { LinearFunctionGraph } from "../components/LinearFunctionGraph";
 import { todayTask } from "../data/mockLearning";
+import { fetchLearningPackage, type LearningPackageUnit } from "../services/learningPackageApi";
+import type { TodayTask } from "../services/todayTaskApi";
 
 type Props = {
   onPractice: () => void;
+  task?: TodayTask | null;
 };
 
-export function LinearFunctionTaskPage({ onPractice }: Props) {
+export function LinearFunctionTaskPage({ onPractice, task = todayTask }: Props) {
+  const [packageUnits, setPackageUnits] = useState<LearningPackageUnit[]>([]);
+  const activeTask = task ?? todayTask;
+
+  useEffect(() => {
+    let active = true;
+
+    fetchLearningPackage(activeTask.learningPackageQuery)
+      .then((learningPackage) => {
+        if (active) setPackageUnits(learningPackage.units);
+      })
+      .catch(() => {
+        if (active) setPackageUnits([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [activeTask.learningPackageQuery]);
+
   return (
     <section className="study-split">
       <div className="problem-panel">
@@ -15,7 +38,7 @@ export function LinearFunctionTaskPage({ onPractice }: Props) {
           <button>下一题</button>
         </div>
         <span className="level-tag">当前题目 · 中等</span>
-        <h1>{todayTask.title}</h1>
+        <h1>{activeTask.title}</h1>
         <p className="problem-copy">
           已知一次函数 y = kx + b 的图像经过点 (2, 3)，且与 y 轴交点在 (0, -1)。先观察图像，再试着解释 k 和 b 的意义。
         </p>
@@ -31,6 +54,19 @@ export function LinearFunctionTaskPage({ onPractice }: Props) {
           <strong>草稿纸</strong>
           <p>3 = 2k - 1，所以 2k = 4，k = 2。</p>
         </div>
+        {packageUnits.length > 0 && (
+          <div className="learning-package">
+            <strong>已审核学习材料</strong>
+            {packageUnits.map((unit) => (
+              <article key={unit.id}>
+                <span>
+                  {unit.chunkType} · {unit.difficulty} · {unit.ability}
+                </span>
+                <p>{unit.contentMarkdown}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="visual-workspace">

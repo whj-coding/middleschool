@@ -16,8 +16,13 @@ const todayTaskQuerySchema = z.object({
   studentId: z.string().min(1),
 });
 
+const startTaskSchema = z.object({
+  studentId: z.string().min(1),
+});
+
 const practiceAnswerSchema = z.object({
   studentId: z.string().min(1),
+  taskId: z.string().min(1),
   questionId: z.string().min(1),
   answer: z.string().min(1),
 });
@@ -43,12 +48,13 @@ export async function registerLearningRoutes(app: FastifyInstance, repository: L
   });
 
   app.post("/tasks/:taskId/start", async (request) => {
-    return { taskId: (request.params as { taskId: string }).taskId, status: "started" };
+    const body = startTaskSchema.parse(request.body);
+    return service.startTask(body.studentId, (request.params as { taskId: string }).taskId);
   });
 
   app.post("/practice/:sessionId/answers", async (request) => {
     const body = practiceAnswerSchema.parse(request.body);
-    return service.submitPracticeAnswer(body.studentId, body.questionId, body.answer);
+    return service.submitPracticeAnswer(body.studentId, body.taskId, body.questionId, body.answer);
   });
 
   app.get("/reports/latest", async (request, reply) => {
