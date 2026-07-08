@@ -11,16 +11,33 @@ describe("student learning API", () => {
     await app.inject({ method: "POST", url: "/diagnostics/initial/start", payload: { studentId } });
     await app.inject({ method: "POST", url: "/diagnostics/diag-1/answers", payload: { studentId, answers: [] } });
     const task = await app.inject({ method: "GET", url: `/tasks/today?studentId=${studentId}` });
-    await app.inject({ method: "POST", url: `/tasks/${task.json().id}/start`, payload: { studentId } });
+    const startedTask = await app.inject({ method: "POST", url: `/tasks/${task.json().id}/start`, payload: { studentId } });
     const practice = await app.inject({
       method: "POST",
       url: "/practice/practice-1/answers",
-      payload: { studentId, questionId: "practice-printing-fee", answer: "y = 3x + 0.4" },
+      payload: { studentId, taskId: "task-linear-kb", questionId: "practice-printing-fee", answer: "y = 3x + 0.4" },
     });
     const report = await app.inject({ method: "GET", url: `/reports/latest?studentId=${studentId}` });
 
     expect(login.statusCode).toBe(200);
+    expect(task.json()).toEqual(
+      expect.objectContaining({
+        taskContent: expect.stringContaining("图像探索"),
+        estimatedMinutes: 20,
+        completionStandard: expect.stringContaining("单位变化量"),
+      }),
+    );
+    expect(task.json().learningPackageQuery).toEqual({
+      knowledgeTag: "k/b意义",
+      difficulty: "基础",
+      ability: "概念",
+    });
+    expect(startedTask.json()).toEqual({ studentId, taskId: "task-linear-kb", status: "started" });
     expect(practice.json().mistake.reason).toBe("审题与建模错误");
+    expect(practice.json().activeTask.status).toBe("completed");
+    expect(report.json().activeTask.status).toBe("completed");
+    expect(report.json().summary).toContain("从打印费理解固定费用和变化费用");
+    expect(report.json().recommendationReasons).toContain("应用建模 · 需加强");
     expect(report.json().nextTask.id).toBe("task-linear-modeling");
   });
 
@@ -34,11 +51,33 @@ describe("student learning API", () => {
     const missingPracticeAnswer = await app.inject({
       method: "POST",
       url: "/practice/practice-1/answers",
-      payload: { studentId: "student-1", questionId: "practice-printing-fee" },
+      payload: { studentId: "student-1", taskId: "task-linear-kb", questionId: "practice-printing-fee" },
     });
 
     expect(badGoal.statusCode).toBe(400);
     expect(missingPracticeAnswer.statusCode).toBe(400);
+  });
+
+  it("completes the task named by the practice answer payload", async () => {
+    const app = buildServer();
+    const studentId = "student-task-routing";
+
+    await app.inject({ method: "POST", url: "/tasks/task-old/start", payload: { studentId } });
+    await app.inject({ method: "POST", url: "/tasks/task-current/start", payload: { studentId } });
+    const practice = await app.inject({
+      method: "POST",
+      url: "/practice/practice-1/answers",
+      payload: {
+        studentId,
+        taskId: "task-current",
+        questionId: "practice-printing-fee",
+        answer: "y = 3x + 0.4",
+      },
+    });
+    const report = await app.inject({ method: "GET", url: `/reports/latest?studentId=${studentId}` });
+
+    expect(practice.json().activeTask).toEqual({ studentId, taskId: "task-current", status: "completed" });
+    expect(report.json().activeTask).toEqual({ studentId, taskId: "task-current", status: "completed" });
   });
 
   it("keeps student state isolated per server instance", async () => {
@@ -49,7 +88,7 @@ describe("student learning API", () => {
     await appA.inject({
       method: "POST",
       url: "/practice/practice-1/answers",
-      payload: { studentId: "student-a", questionId: "practice-printing-fee", answer: "y = 3x + 0.4" },
+      payload: { studentId: "student-a", taskId: "task-linear-kb", questionId: "practice-printing-fee", answer: "y = 3x + 0.4" },
     });
     const reportB = await appB.inject({ method: "GET", url: "/reports/latest?studentId=student-a" });
 
