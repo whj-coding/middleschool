@@ -1,5 +1,5 @@
 import type { createDataPipelineRepository } from "./repository.js";
-import type { ComposeLearningPackageInput, InteractionAction, InteractionLog } from "./types.js";
+import type { ComposeLearningPackageInput, InteractionAction, InteractionLog, RetryPracticeItem } from "./types.js";
 
 type Repository = ReturnType<typeof createDataPipelineRepository>;
 
@@ -37,6 +37,20 @@ export function createDataPipelineService(repository: Repository) {
       const unit = repository.findContentUnit(unitId);
       if (!unit) return null;
       return repository.updateContentUnit({ ...unit, reviewStatus: "approved" });
+    },
+    listRetryPracticeItems(studentId: string): { items: RetryPracticeItem[] } {
+      const items = repository
+        .listInteractionLogs(studentId)
+        .filter((log) => log.action === "submit_answer" && log.correct === false && log.questionId)
+        .map((log) => ({
+          questionId: log.questionId as string,
+          taskId: log.taskId,
+          studentAnswer: log.studentAnswer,
+          hintLevel: log.hintLevel,
+          createdAt: log.createdAt,
+        }));
+
+      return { items };
     },
     recordInteraction(input: RecordInteractionInput): InteractionLog {
       const log: InteractionLog = {

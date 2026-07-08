@@ -9,6 +9,10 @@ const packageQuerySchema = z.object({
   ability: z.enum(["概念", "表达式", "图像", "应用", "综合"]).default("概念"),
 });
 
+const studentRetryQuerySchema = z.object({
+  studentId: z.string().min(1),
+});
+
 const interactionSchema = z.object({
   studentId: z.string().min(1),
   taskId: z.string().min(1).optional(),
@@ -72,6 +76,16 @@ export async function registerDataPipelineRoutes(app: FastifyInstance) {
   app.get("/admin/data-pipeline/content-units/package", async (request) => {
     const query = packageQuerySchema.parse(request.query);
     return service.composeLearningPackage(query);
+  });
+
+  app.get("/student/learning-package", async (request) => {
+    const query = packageQuerySchema.parse(request.query);
+    return service.composeLearningPackage(query);
+  });
+
+  app.get("/student/retry-list", async (request) => {
+    const query = studentRetryQuerySchema.parse(request.query);
+    return service.listRetryPracticeItems(query.studentId);
   });
 
   app.post("/student/interactions", async (request, reply) => {

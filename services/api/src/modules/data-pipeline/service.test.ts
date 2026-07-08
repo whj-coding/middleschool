@@ -56,4 +56,44 @@ describe("data pipeline service", () => {
     expect(log.id).toMatch(/^interaction-/);
     expect(repository.listInteractionLogs("student-1")).toHaveLength(1);
   });
+
+  it("builds retry practice items from wrong submitted answers only", () => {
+    const repository = createDataPipelineRepository();
+    const service = createDataPipelineService(repository);
+
+    service.recordInteraction({
+      studentId: "student-1",
+      taskId: "task-linear-kb",
+      questionId: "practice-printing-fee",
+      action: "submit_answer",
+      studentAnswer: "y = 3x + 0.4",
+      hintLevel: 1,
+      correct: false,
+    });
+    service.recordInteraction({
+      studentId: "student-1",
+      taskId: "task-linear-kb",
+      questionId: "practice-kb-concept",
+      action: "submit_answer",
+      studentAnswer: "b 是截距",
+      correct: true,
+    });
+    service.recordInteraction({
+      studentId: "student-1",
+      taskId: "task-linear-kb",
+      questionId: "practice-hint-only",
+      action: "request_hint",
+      hintLevel: 2,
+    });
+
+    const retryList = service.listRetryPracticeItems("student-1");
+
+    expect(retryList.items).toEqual([
+      expect.objectContaining({
+        questionId: "practice-printing-fee",
+        studentAnswer: "y = 3x + 0.4",
+        hintLevel: 1,
+      }),
+    ]);
+  });
 });

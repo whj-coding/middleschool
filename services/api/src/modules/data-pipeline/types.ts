@@ -40,6 +40,14 @@ export type InteractionLog = {
   createdAt: string;
 };
 
+export type RetryPracticeItem = {
+  questionId: string;
+  taskId: string | null;
+  studentAnswer: string | null;
+  hintLevel: number;
+  createdAt: string;
+};
+
 export type ComposeLearningPackageInput = {
   knowledgeTag: string;
   difficulty: Difficulty;
