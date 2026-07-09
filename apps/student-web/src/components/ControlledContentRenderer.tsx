@@ -12,7 +12,7 @@ type Block =
   | { type: "image"; alt: string; src: string };
 
 function isSafeImageSrc(src: string) {
-  return src.startsWith("/") || src.startsWith("./") || src.startsWith("images/");
+  return (src.startsWith("/") && !src.startsWith("//")) || src.startsWith("./") || src.startsWith("images/");
 }
 
 function parseImage(line: string) {

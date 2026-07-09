@@ -36,6 +36,7 @@ describe("ControlledContentRenderer", () => {
         markdown={[
           "这段 <script>window.bad = true</script> 只能当文本。",
           "![外链图](https://example.com/unsafe.png)",
+          "![协议相对外链](//example.com/unsafe.png)",
           "![脚本图](javascript:alert(1))",
         ].join("\n")}
       />,
@@ -43,6 +44,7 @@ describe("ControlledContentRenderer", () => {
 
     expect(screen.getByText(/<script>window.bad = true<\/script>/)).toBeInTheDocument();
     expect(screen.queryByRole("img", { name: "外链图" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "协议相对外链" })).not.toBeInTheDocument();
     expect(screen.queryByRole("img", { name: "脚本图" })).not.toBeInTheDocument();
     expect(container.querySelector("script")).toBeNull();
   });
