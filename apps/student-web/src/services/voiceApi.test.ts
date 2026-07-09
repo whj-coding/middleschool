@@ -25,10 +25,41 @@ describe("voiceApi", () => {
     expect(result.confidence).toBe(0.92);
   });
 
+  it("maps the backend voice transcription contract into the student transcript shape", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        text: "我确认 3 元是固定费用，0.4 元是每页变化费用。",
+        confidence: 0.93,
+        confirmed: true,
+      }),
+    });
+
+    const result = await transcribeVoiceThought(fetchMock);
+
+    expect(result).toEqual({
+      transcript: "我确认 3 元是固定费用，0.4 元是每页变化费用。",
+      confidence: 0.93,
+    });
+  });
+
   it("throws when voice transcription fails", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       json: async () => ({}),
+    });
+
+    await expect(transcribeVoiceThought(fetchMock)).rejects.toThrow("Failed to transcribe voice thought");
+  });
+
+  it("throws when voice transcription confidence is invalid", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        text: "我确认 3 元是固定费用，0.4 元是每页变化费用。",
+        confidence: "unknown",
+        confirmed: true,
+      }),
     });
 
     await expect(transcribeVoiceThought(fetchMock)).rejects.toThrow("Failed to transcribe voice thought");

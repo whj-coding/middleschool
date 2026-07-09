@@ -14,5 +14,20 @@ export async function transcribeVoiceThought(fetcher: typeof fetch = fetch): Pro
 
   if (!response.ok) throw new Error("Failed to transcribe voice thought");
 
-  return response.json() as Promise<VoiceTranscript>;
+  const raw = (await response.json()) as {
+    transcript?: unknown;
+    text?: unknown;
+    confidence?: unknown;
+  };
+  const transcript = typeof raw.transcript === "string" && raw.transcript.trim() ? raw.transcript : raw.text;
+  const confidence = Number(raw.confidence);
+
+  if (typeof transcript !== "string" || !transcript.trim() || !Number.isFinite(confidence)) {
+    throw new Error("Failed to transcribe voice thought");
+  }
+
+  return {
+    transcript,
+    confidence,
+  };
 }

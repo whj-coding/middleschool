@@ -139,8 +139,9 @@ test("student completes the linear-function learning slice", async ({ page }) =>
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        transcript: "我确认 3 元是固定费用，0.4 元是每页变化费用。",
+        text: "我确认 3 元是固定费用，0.4 元是每页变化费用。",
         confidence: 0.93,
+        confirmed: true,
       }),
     });
   });
