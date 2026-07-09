@@ -2,12 +2,22 @@ import { expect, test } from "@playwright/test";
 
 test("student completes the linear-function learning slice", async ({ page }) => {
   const errors: string[] = [];
-  const interactionPayloads: Array<{ action: string; taskId: string | null }> = [];
+  const interactionPayloads: Array<{
+    action: string;
+    taskId: string | null;
+    questionId?: string;
+    studentAnswer?: string;
+  }> = [];
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
   });
   await page.route("**/api/student/interactions", async (route) => {
-    const payload = route.request().postDataJSON() as { action: string; taskId: string | null };
+    const payload = route.request().postDataJSON() as {
+      action: string;
+      taskId: string | null;
+      questionId?: string;
+      studentAnswer?: string;
+    };
     interactionPayloads.push(payload);
     await route.fulfill({
       status: 201,
@@ -124,6 +134,16 @@ test("student completes the linear-function learning slice", async ({ page }) =>
       }),
     });
   });
+  await page.route("**/api/voice/stt", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        transcript: "我确认 3 元是固定费用，0.4 元是每页变化费用。",
+        confidence: 0.93,
+      }),
+    });
+  });
 
   await page.goto("/");
   await page.getByRole("button", { name: "选择 110+ 并开始诊断" }).click();
@@ -133,6 +153,10 @@ test("student completes the linear-function learning slice", async ({ page }) =>
   await expect(page.getByText("理解 k 和 b 的意义")).toBeVisible();
   await expect(page.getByText("已审核学习材料")).toBeVisible();
   await page.getByRole("button", { name: "进入练习" }).click();
+  await expect(page.getByText("打印费建模")).toBeVisible();
+  await page.getByRole("button", { name: "重新录入" }).click();
+  await expect(page.getByLabel("语音转写")).toHaveValue("我确认 3 元是固定费用，0.4 元是每页变化费用。");
+  await page.getByLabel("语音转写").fill("我确认 3 元是 b，0.4 是 k。");
   await page.getByRole("button", { name: "提交答案" }).click();
   await expect(page.getByText("审题与建模错误")).toBeVisible();
   await page.getByRole("button", { name: "生成学情报告" }).click();
@@ -151,6 +175,8 @@ test("student completes the linear-function learning slice", async ({ page }) =>
   await page.getByRole("button", { name: "开始复练" }).click();
   await expect(page.getByText("打印费建模")).toBeVisible();
   expect(interactionPayloads.map((payload) => payload.action)).toContain("submit_answer");
+  expect(interactionPayloads[0].questionId).toBe("practice-printing-fee");
+  expect(interactionPayloads[0].studentAnswer).toContain("语音转写：我确认 3 元是 b，0.4 是 k。");
   expect(interactionPayloads[0].taskId).toBe("task-linear-kb");
   expect(interactionPayloads[1].taskId).toBe("task-linear-modeling");
   expect(errors).toEqual([]);

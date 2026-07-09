@@ -10,6 +10,8 @@ Mode: L2 targeted fixes
 - Current branch `codex/controlled-content-rendering` contains controlled Markdown/formula/figure rendering work plus committed follow-up fix `31d1d01`.
 
 ## Watch List
+- Voice thought loop completed: PracticePage can call mock STT, show editable transcript, and include transcript evidence in `submit_answer` interaction payload.
+- Verification passed after voice thought loop: `apps/student-web npm test`, `apps/student-web npm run lint`, `apps/student-web npm run build`, `apps/student-web npm run test:e2e`, `services/api npm test`, and `services/api npm run build`.
 
 - P1 fixed: practice answer payload now carries `taskId`; backend completes the named task instead of the first started task.
 - Local review follow-up fixed: when a retry submits an older task while a newer task is started, `getLatestReport()` now reports the task most recently completed by a practice answer.
