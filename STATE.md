@@ -13,6 +13,7 @@ Mode: L2 targeted fixes
 - Voice thought loop completed: PracticePage can call mock STT, show editable transcript, and include transcript evidence in `submit_answer` interaction payload.
 - Verification passed after voice thought loop: `apps/student-web npm test`, `apps/student-web npm run lint`, `apps/student-web npm run build`, `apps/student-web npm run test:e2e`, `services/api npm test`, and `services/api npm run build`.
 - Final review follow-up fixed: student voice API now maps the backend mock STT contract `{ text, confidence, confirmed }` into the frontend `{ transcript, confidence }` shape, and E2E mocks use the backend shape.
+- Code review follow-up fixed: example voice text is now placeholder-only, and submissions omit voice evidence until the student records or enters it.
 
 - P1 fixed: practice answer payload now carries `taskId`; backend completes the named task instead of the first started task.
 - Local review follow-up fixed: when a retry submits an older task while a newer task is started, `getLatestReport()` now reports the task most recently completed by a practice answer.

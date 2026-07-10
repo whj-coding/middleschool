@@ -11,16 +11,18 @@ type Props = {
 
 const DEFAULT_ANSWER = "y = 3x + 0.4";
 const DEFAULT_STEPS = "我把每页费用写成了固定部分，可能没有分清 x 表示页数。";
-const DEFAULT_VOICE_TRANSCRIPT = "我觉得 3 元是固定费用，0.4 元才是每增加 1 页变化的费用。";
+const VOICE_TRANSCRIPT_EXAMPLE = "例如：我觉得 3 元是固定费用，0.4 元才是每增加 1 页变化的费用。";
 
 function buildStudentAnswerEvidence(answer: string, steps: string, voiceTranscript: string) {
-  return [`最终答案：${answer}`, `我的步骤：${steps}`, `语音转写：${voiceTranscript}`].join("\n");
+  const evidence = [`最终答案：${answer}`, `我的步骤：${steps}`];
+  if (voiceTranscript.trim()) evidence.push(`语音转写：${voiceTranscript.trim()}`);
+  return evidence.join("\n");
 }
 
 export function PracticePage({ onSubmit, taskId, questionId = "practice-printing-fee" }: Props) {
   const [answer, setAnswer] = useState(DEFAULT_ANSWER);
   const [steps, setSteps] = useState(DEFAULT_STEPS);
-  const [voiceTranscript, setVoiceTranscript] = useState(DEFAULT_VOICE_TRANSCRIPT);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
   const [voiceStatus, setVoiceStatus] = useState<"idle" | "transcribing" | "failed">("idle");
 
   async function handleVoiceRetry() {
@@ -95,6 +97,7 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
             <textarea
               aria-label="语音转写"
               value={voiceTranscript}
+              placeholder={VOICE_TRANSCRIPT_EXAMPLE}
               onChange={(event) => setVoiceTranscript(event.target.value)}
             />
           </label>

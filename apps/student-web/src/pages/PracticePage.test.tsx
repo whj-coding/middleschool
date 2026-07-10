@@ -27,7 +27,7 @@ describe("PracticePage", () => {
     expect(interactionPayload.taskId).toBe("task-linear-modeling");
     expect(interactionPayload.studentAnswer).toContain("最终答案：y = 3x + 0.4");
     expect(interactionPayload.studentAnswer).toContain("我的步骤：我把每页费用写成了固定部分，可能没有分清 x 表示页数。");
-    expect(interactionPayload.studentAnswer).toContain("语音转写：我觉得 3 元是固定费用，0.4 元才是每增加 1 页变化的费用。");
+    expect(interactionPayload.studentAnswer).not.toContain("语音转写：");
     expect(JSON.parse(practiceCall?.[1]?.body as string).taskId).toBe("task-linear-modeling");
   });
 
@@ -89,5 +89,9 @@ describe("PracticePage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "提交答案" }));
     expect(onSubmit).toHaveBeenCalledOnce();
+
+    const interactionCall = fetchMock.mock.calls.find(([url]) => url === "/api/student/interactions");
+    const interactionPayload = JSON.parse(interactionCall?.[1]?.body as string);
+    expect(interactionPayload.studentAnswer).not.toContain("语音转写：");
   });
 });
