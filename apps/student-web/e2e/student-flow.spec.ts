@@ -84,7 +84,12 @@ test("student completes the linear-function learning slice", async ({ page }) =>
           {
             id: "unit-linear-kb-concept",
             chunkType: "concept",
-            contentMarkdown: "k 表示单位变化量，b 表示初始量。",
+            contentMarkdown: [
+              "## k 和 b 怎么看",
+              "一次函数可以写成 $y = kx + b$。",
+              "",
+              "![一次函数图像](/images/content/linear-kb-concept.png)",
+            ].join("\n"),
             knowledgeTags: ["一次函数", "k/b意义"],
             difficulty: "基础",
             ability: "概念",
@@ -153,6 +158,10 @@ test("student completes the linear-function learning slice", async ({ page }) =>
   await page.getByRole("button", { name: "开始今日任务" }).click();
   await expect(page.getByText("理解 k 和 b 的意义")).toBeVisible();
   await expect(page.getByText("已审核学习材料")).toBeVisible();
+  await expect(page.getByLabel("公式 y = kx + b").locator(".katex")).toBeVisible();
+  const contentFigure = page.getByRole("img", { name: "一次函数图像" });
+  await expect(contentFigure).toBeVisible();
+  await expect.poll(() => contentFigure.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await page.getByRole("button", { name: "进入练习" }).click();
   await expect(page.getByText("打印费建模")).toBeVisible();
   await page.getByRole("button", { name: "重新录入" }).click();

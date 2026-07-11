@@ -51,7 +51,7 @@ export async function registerDataPipelineRoutes(app: FastifyInstance) {
       "y = 0.4x + 3",
       "$$",
       "",
-      "![一次函数图像](images/linear-kb-concept.png)",
+      "![一次函数图像](/images/content/linear-kb-concept.png)",
     ].join("\n"),
     knowledgeTags: ["一次函数", "k/b意义"],
     difficulty: "基础",
