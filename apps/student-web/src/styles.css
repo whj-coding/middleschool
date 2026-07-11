@@ -178,6 +178,10 @@ input:focus-visible {
   align-items: start;
 }
 
+.study-split > * {
+  min-width: 0;
+}
+
 .problem-panel,
 .visual-workspace,
 .coach-panel {
@@ -978,6 +982,10 @@ svg {
   .problem-toolbar {
     position: static;
     margin-top: 12px;
+  }
+
+  .answer-actions {
+    flex-wrap: wrap;
   }
 
   .condition-grid,
