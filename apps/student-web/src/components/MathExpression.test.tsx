@@ -15,12 +15,15 @@ describe("MathExpression", () => {
     expect(block?.querySelector(".katex")).not.toBeNull();
   });
 
-  it.each(["\\notacommand{", "x".repeat(2001)])("falls back for invalid or oversized formula %s", (expression) => {
-    const { container } = render(<MathExpression expression={expression} displayMode={false} />);
-    const fallback = container.querySelector(".math-fallback");
-    expect(fallback).not.toBeNull();
-    expect(fallback).toHaveAttribute("aria-label", `公式 ${expression}`);
-    expect(screen.getByText(expression).closest(".math-fallback")).toBe(fallback);
-    expect(fallback?.querySelector(".sr-only")).toHaveTextContent("公式暂时无法显示");
-  });
+  it.each(["\\notacommand{", "\\href{javascript:alert(1)}{x}", "x".repeat(2001)])(
+    "falls back for invalid, untrusted, or oversized formula %s",
+    (expression) => {
+      const { container } = render(<MathExpression expression={expression} displayMode={false} />);
+      const fallback = container.querySelector(".math-fallback");
+      expect(fallback).not.toBeNull();
+      expect(fallback).toHaveAttribute("aria-label", `公式 ${expression}`);
+      expect(screen.getByText(expression).closest(".math-fallback")).toBe(fallback);
+      expect(fallback?.querySelector(".sr-only")).toHaveTextContent("公式暂时无法显示");
+    },
+  );
 });

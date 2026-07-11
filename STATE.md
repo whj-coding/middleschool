@@ -16,7 +16,7 @@ Mode: L2 targeted fixes
 - Formula rendering rejects untrusted commands, formulas over 2,000 characters, and excessive macro expansion; invalid formulas fall back to readable text.
 - Missing content figures now render an accessible, layout-stable placeholder instead of a broken image.
 - Mobile browser QA fixed grid-item intrinsic-width overflow; at 390px the document no longer scrolls horizontally and the 960px source figure renders inside a 304px content area.
-- Verification passed for this slice: student-web 48 tests, lint, build, Playwright E2E, API 31 tests, and API build.
+- Verification passed for this slice: student-web 49 tests, lint, build, Playwright E2E, API 31 tests, and API build.
 - Independent sub-agent review for this slice remains pending because the agent channel repeatedly timed out without returning a verdict.
 - Voice thought loop completed: PracticePage can call mock STT, show editable transcript, and include transcript evidence in `submit_answer` interaction payload.
 - Verification passed after voice thought loop: `apps/student-web npm test`, `apps/student-web npm run lint`, `apps/student-web npm run build`, `apps/student-web npm run test:e2e`, `services/api npm test`, and `services/api npm run build`.
