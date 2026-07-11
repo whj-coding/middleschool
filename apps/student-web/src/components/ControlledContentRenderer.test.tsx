@@ -17,7 +17,7 @@ describe("ControlledContentRenderer", () => {
           "y = 0.4x + 3",
           "$$",
           "",
-          "![一次函数图像](images/linear-printing-fee.png)",
+          "![一次函数图像](/images/content/linear-printing-fee.png)",
         ].join("\n")}
       />,
     );
@@ -28,7 +28,10 @@ describe("ControlledContentRenderer", () => {
     expect(screen.getByLabelText("公式 b")).toBeInTheDocument();
     expect(screen.getByLabelText("公式 y = 0.4x + 3")).toBeInTheDocument();
     expect(container.querySelectorAll(".katex").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getByRole("img", { name: "一次函数图像" })).toHaveAttribute("src", "images/linear-printing-fee.png");
+    expect(screen.getByRole("img", { name: "一次函数图像" })).toHaveAttribute(
+      "src",
+      "/images/content/linear-printing-fee.png",
+    );
   });
 
   it("treats html as text and ignores unsafe figure urls", () => {
@@ -39,6 +42,8 @@ describe("ControlledContentRenderer", () => {
           "![外链图](https://example.com/unsafe.png)",
           "![协议相对外链](//example.com/unsafe.png)",
           "![脚本图](javascript:alert(1))",
+          "![路径穿越](/images/content/../unsafe.png)",
+          "![查询参数](/images/content/unsafe.png?v=1)",
         ].join("\n")}
       />,
     );
@@ -47,6 +52,8 @@ describe("ControlledContentRenderer", () => {
     expect(screen.queryByRole("img", { name: "外链图" })).not.toBeInTheDocument();
     expect(screen.queryByRole("img", { name: "协议相对外链" })).not.toBeInTheDocument();
     expect(screen.queryByRole("img", { name: "脚本图" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "路径穿越" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "查询参数" })).not.toBeInTheDocument();
     expect(container.querySelector("script")).toBeNull();
   });
 });

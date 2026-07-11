@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { ContentFigure } from "./ContentFigure";
+import { isSafeContentFigureSrc } from "./contentFigurePolicy";
 import { MathExpression } from "./MathExpression";
 
 type Props = {
@@ -12,15 +14,11 @@ type Block =
   | { type: "math"; expression: string }
   | { type: "image"; alt: string; src: string };
 
-function isSafeImageSrc(src: string) {
-  return (src.startsWith("/") && !src.startsWith("//")) || src.startsWith("./") || src.startsWith("images/");
-}
-
 function parseImage(line: string) {
   const match = line.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
   if (!match) return null;
   const [, alt, src] = match;
-  if (!isSafeImageSrc(src)) return null;
+  if (!isSafeContentFigureSrc(src)) return null;
   return { alt, src };
 }
 
@@ -167,7 +165,7 @@ export function ControlledContentRenderer({ markdown }: Props) {
         }
 
         if (block.type === "image") {
-          return <img className="content-figure" key={index} src={block.src} alt={block.alt} loading="lazy" />;
+          return <ContentFigure key={index} src={block.src} alt={block.alt} />;
         }
 
         return <p key={index}>{renderInline(block.text)}</p>;
