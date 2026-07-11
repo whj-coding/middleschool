@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ControlledContentRenderer } from "../components/ControlledContentRenderer";
 import { LinearFunctionGraph } from "../components/LinearFunctionGraph";
 import { todayTask } from "../data/mockLearning";
 import { fetchLearningPackage, type LearningPackageUnit } from "../services/learningPackageApi";
@@ -62,7 +63,7 @@ export function LinearFunctionTaskPage({ onPractice, task = todayTask }: Props) 
                 <span>
                   {unit.chunkType} · {unit.difficulty} · {unit.ability}
                 </span>
-                <p>{unit.contentMarkdown}</p>
+                <ControlledContentRenderer markdown={unit.contentMarkdown} />
               </article>
             ))}
           </div>

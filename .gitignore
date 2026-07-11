@@ -6,6 +6,7 @@ playwright-report/
 .vite/
 .cache/
 .npm-cache/
+.superpowers/sdd/
 
 *.log
 npm-debug.log*

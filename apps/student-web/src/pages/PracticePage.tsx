@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { recordInteraction } from "../services/interactionApi";
 import { submitPracticeAnswer } from "../services/practiceApi";
+import { transcribeVoiceThought } from "../services/voiceApi";
 
 type Props = {
   onSubmit: () => void;
@@ -7,15 +9,43 @@ type Props = {
   questionId?: string;
 };
 
+const DEFAULT_ANSWER = "y = 3x + 0.4";
+const DEFAULT_STEPS = "我把每页费用写成了固定部分，可能没有分清 x 表示页数。";
+const VOICE_TRANSCRIPT_EXAMPLE = "例如：我觉得 3 元是固定费用，0.4 元才是每增加 1 页变化的费用。";
+
+function buildStudentAnswerEvidence(answer: string, steps: string, voiceTranscript: string) {
+  const evidence = [`最终答案：${answer}`, `我的步骤：${steps}`];
+  if (voiceTranscript.trim()) evidence.push(`语音转写：${voiceTranscript.trim()}`);
+  return evidence.join("\n");
+}
+
 export function PracticePage({ onSubmit, taskId, questionId = "practice-printing-fee" }: Props) {
+  const [answer, setAnswer] = useState(DEFAULT_ANSWER);
+  const [steps, setSteps] = useState(DEFAULT_STEPS);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [voiceStatus, setVoiceStatus] = useState<"idle" | "transcribing" | "failed">("idle");
+
+  async function handleVoiceRetry() {
+    setVoiceStatus("transcribing");
+    try {
+      const result = await transcribeVoiceThought();
+      setVoiceTranscript(result.transcript);
+      setVoiceStatus("idle");
+    } catch {
+      setVoiceStatus("failed");
+    }
+  }
+
   async function handleSubmit() {
+    const studentAnswer = buildStudentAnswerEvidence(answer, steps, voiceTranscript);
+
     try {
       await recordInteraction({
         studentId: "student-demo",
         taskId,
         questionId,
         action: "submit_answer",
-        studentAnswer: "y = 3x + 0.4",
+        studentAnswer,
         hintLevel: 1,
         correct: false,
       });
@@ -28,7 +58,7 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
         studentId: "student-demo",
         taskId,
         questionId,
-        answer: "y = 3x + 0.4",
+        answer,
       });
     } catch {
       // Prototype continues the local learning flow when the API is unavailable.
@@ -52,21 +82,30 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
         <div className="answer-workspace">
           <label>
             <span>最终答案</span>
-            <input aria-label="最终答案" defaultValue="y = 3x + 0.4" />
+            <input aria-label="最终答案" value={answer} onChange={(event) => setAnswer(event.target.value)} />
           </label>
           <label>
             <span>我的步骤</span>
-            <textarea aria-label="我的步骤" defaultValue="我把每页费用写成了固定部分，可能没有分清 x 表示页数。" />
+            <textarea aria-label="我的步骤" value={steps} onChange={(event) => setSteps(event.target.value)} />
           </label>
         </div>
 
         <div className="voice-strip">
-          <div>
+          <label>
             <strong>语音说思路</strong>
-            <span>转写：我觉得 3 元是固定费用，0.4 元才是每增加 1 页变化的费用。</span>
-          </div>
-          <button>重新录入</button>
+            <span>语音转写</span>
+            <textarea
+              aria-label="语音转写"
+              value={voiceTranscript}
+              placeholder={VOICE_TRANSCRIPT_EXAMPLE}
+              onChange={(event) => setVoiceTranscript(event.target.value)}
+            />
+          </label>
+          <button onClick={() => void handleVoiceRetry()} disabled={voiceStatus === "transcribing"}>
+            {voiceStatus === "transcribing" ? "转写中..." : "重新录入"}
+          </button>
         </div>
+        {voiceStatus === "failed" && <p className="sync-status">语音转写暂不可用，可继续手动输入思路。</p>}
 
         <div className="sync-status">
           <span>将记录：submit_answer</span> · questionId={questionId} · hintLevel=1
