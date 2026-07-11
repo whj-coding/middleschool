@@ -20,9 +20,16 @@ export async function transcribeVoiceThought(fetcher: typeof fetch = fetch): Pro
     confidence?: unknown;
   };
   const transcript = typeof raw.transcript === "string" && raw.transcript.trim() ? raw.transcript : raw.text;
-  const confidence = Number(raw.confidence);
+  const confidence = raw.confidence;
 
-  if (typeof transcript !== "string" || !transcript.trim() || !Number.isFinite(confidence)) {
+  if (
+    typeof transcript !== "string" ||
+    !transcript.trim() ||
+    typeof confidence !== "number" ||
+    !Number.isFinite(confidence) ||
+    confidence < 0 ||
+    confidence > 1
+  ) {
     throw new Error("Failed to transcribe voice thought");
   }
 
