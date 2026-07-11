@@ -1,4 +1,5 @@
 import { useReducer } from "react";
+import "katex/dist/katex.min.css";
 import { todayTask } from "./data/mockLearning";
 import { GoalSetupPage } from "./pages/GoalSetupPage";
 import { InitialDiagnosticPage } from "./pages/InitialDiagnosticPage";

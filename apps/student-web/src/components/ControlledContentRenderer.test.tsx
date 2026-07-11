@@ -4,7 +4,7 @@ import { ControlledContentRenderer } from "./ControlledContentRenderer";
 
 describe("ControlledContentRenderer", () => {
   it("renders approved markdown, formulas, and safe figure references", () => {
-    render(
+    const { container } = render(
       <ControlledContentRenderer
         markdown={[
           "## 打印费建模",
@@ -27,6 +27,7 @@ describe("ControlledContentRenderer", () => {
     expect(screen.getByLabelText("公式 k")).toBeInTheDocument();
     expect(screen.getByLabelText("公式 b")).toBeInTheDocument();
     expect(screen.getByLabelText("公式 y = 0.4x + 3")).toBeInTheDocument();
+    expect(container.querySelectorAll(".katex").length).toBeGreaterThanOrEqual(3);
     expect(screen.getByRole("img", { name: "一次函数图像" })).toHaveAttribute("src", "images/linear-printing-fee.png");
   });
 
