@@ -6,7 +6,8 @@ type Props = {
 };
 
 const MAX_EXPRESSION_LENGTH = 2_000;
-const UNTRUSTED_COMMAND = /\\(?:href|url|includegraphics|htmlClass|htmlId|htmlStyle|htmlData)\b/;
+const FORBIDDEN_COMMAND =
+  /\\(?:href|url|includegraphics|htmlClass|htmlId|htmlStyle|htmlData|def|gdef|edef|xdef|let|futurelet|newcommand|renewcommand|providecommand|csname)\b/;
 
 export function MathExpression({ expression, displayMode }: Props) {
   const className = displayMode ? "math-block" : "math-inline";
@@ -15,8 +16,8 @@ export function MathExpression({ expression, displayMode }: Props) {
     if (expression.length > MAX_EXPRESSION_LENGTH) {
       throw new Error("formula_too_long");
     }
-    if (UNTRUSTED_COMMAND.test(expression)) {
-      throw new Error("formula_contains_untrusted_command");
+    if (FORBIDDEN_COMMAND.test(expression)) {
+      throw new Error("formula_contains_forbidden_command");
     }
 
     const html = katex.renderToString(expression, {

@@ -191,3 +191,75 @@ test("student completes the linear-function learning slice", async ({ page }) =>
   expect(interactionPayloads[1].taskId).toBe("task-linear-modeling");
   expect(errors).toEqual([]);
 });
+
+test("controlled learning content stays usable on mobile when a figure fails", async ({ page }) => {
+  const longFormula = Array.from({ length: 80 }, (_, index) => `x_{${index}}`).join("+");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/images/content/linear-kb-concept.png", async (route) => {
+    await route.fulfill({ status: 404, body: "missing" });
+  });
+  await page.route("**/api/tasks/today**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: "task-linear-kb",
+        title: "理解 k 和 b 的意义",
+        reason: "补稳定的 k/b 意义。",
+        taskContent: "完成图像探索。",
+        estimatedMinutes: 20,
+        durationOptions: [10, 20, 40],
+        completion: "完成图像探索。",
+        completionStandard: "能解释 k 和 b。",
+        learningPackageQuery: { knowledgeTag: "k/b意义", difficulty: "基础", ability: "概念" },
+      }),
+    });
+  });
+  await page.route("**/api/tasks/task-linear-kb/start", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ studentId: "student-demo", taskId: "task-linear-kb", status: "started" }),
+    });
+  });
+  await page.route("**/api/student/learning-package**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        units: [
+          {
+            id: "unit-linear-kb-concept",
+            chunkType: "concept",
+            contentMarkdown: [
+              "## k 和 b 怎么看",
+              "$$",
+              longFormula,
+              "$$",
+              "![一次函数图像](/images/content/linear-kb-concept.png)",
+            ].join("\n"),
+            knowledgeTags: ["一次函数", "k/b意义"],
+            difficulty: "基础",
+            ability: "概念",
+            errorTypes: ["概念理解错误"],
+            reviewStatus: "approved",
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "选择 110+ 并开始诊断" }).click();
+  await page.getByRole("button", { name: "完成诊断" }).click();
+  await page.getByRole("button", { name: "开始今日任务" }).click();
+
+  await expect(page.getByRole("status")).toHaveText("一次函数图像暂时无法显示");
+  await expect(page.getByRole("img", { name: "一次函数图像" })).toHaveCount(0);
+  const blockFormula = page.locator(".math-block");
+  await expect(blockFormula).toBeVisible();
+  expect(await blockFormula.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth),
+  ).toBe(true);
+});

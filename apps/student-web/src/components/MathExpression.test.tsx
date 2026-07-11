@@ -15,7 +15,12 @@ describe("MathExpression", () => {
     expect(block?.querySelector(".katex")).not.toBeNull();
   });
 
-  it.each(["\\notacommand{", "\\href{javascript:alert(1)}{x}", "x".repeat(2001)])(
+  it.each([
+    "\\notacommand{",
+    "\\href{javascript:alert(1)}{x}",
+    "\\def\\shortcut{x}\\shortcut",
+    "x".repeat(2001),
+  ])(
     "falls back for invalid, untrusted, or oversized formula %s",
     (expression) => {
       const { container } = render(<MathExpression expression={expression} displayMode={false} />);
