@@ -6,6 +6,7 @@ export type StudentProfile = {
 };
 
 export type MistakeRecord = {
+  taskId: string;
   questionId: string;
   reason: string;
   evidence: string;

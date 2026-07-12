@@ -21,6 +21,7 @@ describe("ReportPage", () => {
               weakPoints: ["应用建模"],
               mistakes: [
                 {
+                  taskId: "task-linear-kb",
                   questionId: "practice-printing-fee",
                   reason: "审题与建模错误",
                   evidence: "混淆固定费用。",
@@ -143,6 +144,9 @@ describe("ReportPage", () => {
     const { container } = render(<ReportPage />);
 
     expect(await screen.findByText("本次未发现主要错因")).toBeInTheDocument();
+    expect(screen.getByText("本次未发现明显薄弱点")).toBeInTheDocument();
+    expect(screen.getByText(/完成本次学习任务。任务状态：已完成/)).toBeInTheDocument();
+    expect(screen.queryByText(/1次错因复盘/)).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent("容易把固定费用和单位变化费用写反。");
   });
 });

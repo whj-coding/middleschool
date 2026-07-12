@@ -25,6 +25,7 @@ describe("learning service", () => {
     });
     expect(startedTask.status).toBe("started");
     expect(result.mistake?.reason).toBe("审题与建模错误");
+    expect(result.mistake?.taskId).toBe(task.id);
     expect(result.activeTask?.status).toBe("completed");
     if (!report) throw new Error("expected report after practice submission");
     expect(report.activeTask?.status).toBe("completed");
@@ -184,5 +185,21 @@ describe("learning service", () => {
     expect(report?.weakPoints).toEqual([]);
     expect(report?.mistakes).toEqual([]);
     expect(report?.recommendationReasons).not.toContain("审题与建模错误 · 优先复盘");
+  });
+
+  it("keeps mistakes with the same question id isolated to their task", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.startTask("student-1", "task-old");
+    service.submitPracticeAnswer("student-1", "task-old", "shared-question", "y = 3x + 0.4");
+    service.startTask("student-1", "task-current");
+    service.submitPracticeAnswer("student-1", "task-current", "shared-question", "y = 3x + 0.4");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.activeTask?.taskId).toBe("task-current");
+    expect(report?.mistakes).toEqual([
+      expect.objectContaining({ taskId: "task-current", questionId: "shared-question" }),
+    ]);
   });
 });

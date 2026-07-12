@@ -55,6 +55,7 @@ export function createLearningService(repository: LearningRepository) {
       if (correct) return { correct, answer, activeTask: completedTask };
 
       const mistake = {
+        taskId,
         questionId,
         reason: "审题与建模错误",
         evidence: `学生答案 ${answer} 混淆了固定费用和单位变化费用。`,
@@ -70,7 +71,9 @@ export function createLearningService(repository: LearningRepository) {
       const reportTaskId = activeTask?.taskId ?? allAttempts.at(-1)!.taskId;
       const taskAttempts = allAttempts.filter((attempt) => attempt.taskId === reportTaskId);
       const incorrectQuestionIds = new Set(taskAttempts.filter((attempt) => !attempt.correct).map((attempt) => attempt.questionId));
-      const studentMistakes = repository.listMistakes(studentId).filter((mistake) => incorrectQuestionIds.has(mistake.questionId));
+      const studentMistakes = repository
+        .listMistakes(studentId)
+        .filter((mistake) => mistake.taskId === reportTaskId && incorrectQuestionIds.has(mistake.questionId));
       const correctAttempts = taskAttempts.filter((attempt) => attempt.correct).length;
       const correctRate = correctAttempts / taskAttempts.length;
       const completionRate = Math.min(100, Math.max(0, Math.round(correctRate * 100)));
