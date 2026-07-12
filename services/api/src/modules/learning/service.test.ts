@@ -159,4 +159,30 @@ describe("learning service", () => {
     expect(report?.completionRate).toBe(67);
     expect(report?.summary).toContain("本次正确率 67%");
   });
+
+  it("calculates the latest report only from attempts for its active task", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+    service.startTask("student-1", "task-old");
+    service.submitPracticeAnswer("student-1", "task-old", "old-1", "y = 3x + 0.4");
+    service.startTask("student-1", "task-current");
+    service.submitPracticeAnswer("student-1", "task-current", "current-1", "y = 0.4x + 3");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.activeTask?.taskId).toBe("task-current");
+    expect(report?.completionRate).toBe(100);
+    expect(report?.summary).toContain("本次正确率 100%");
+  });
+
+  it("does not invent weak points or mistakes for an all-correct task", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+    service.startTask("student-1", "task-current");
+    service.submitPracticeAnswer("student-1", "task-current", "current-1", "y = 0.4x + 3");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.weakPoints).toEqual([]);
+    expect(report?.mistakes).toEqual([]);
+    expect(report?.recommendationReasons).not.toContain("审题与建模错误 · 优先复盘");
+  });
 });

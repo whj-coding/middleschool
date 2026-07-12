@@ -64,31 +64,39 @@ export function createLearningService(repository: LearningRepository) {
     },
 
     getLatestReport(studentId: string) {
-      const studentAttempts = repository.listAttempts(studentId);
-      if (studentAttempts.length === 0) return null;
-      const studentMistakes = repository.listMistakes(studentId);
-      const correctAttempts = studentAttempts.filter((attempt) => attempt.correct).length;
-      const correctRate = correctAttempts / studentAttempts.length;
-      const completionRate = Math.min(100, Math.max(0, Math.round(correctRate * 100)));
+      const allAttempts = repository.listAttempts(studentId);
+      if (allAttempts.length === 0) return null;
       const activeTask = repository.listTasks(studentId).filter((task) => task.status === "completed").at(-1) ?? null;
+      const reportTaskId = activeTask?.taskId ?? allAttempts.at(-1)!.taskId;
+      const taskAttempts = allAttempts.filter((attempt) => attempt.taskId === reportTaskId);
+      const incorrectQuestionIds = new Set(taskAttempts.filter((attempt) => !attempt.correct).map((attempt) => attempt.questionId));
+      const studentMistakes = repository.listMistakes(studentId).filter((mistake) => incorrectQuestionIds.has(mistake.questionId));
+      const correctAttempts = taskAttempts.filter((attempt) => attempt.correct).length;
+      const correctRate = correctAttempts / taskAttempts.length;
+      const completionRate = Math.min(100, Math.max(0, Math.round(correctRate * 100)));
       const nextTask = { id: "task-linear-modeling", title: "从打印费理解固定费用和变化费用" };
+      const hasMistakes = studentMistakes.length > 0;
+      const progress = hasMistakes
+        ? "能说出 k 影响直线方向，但建模时还需要先分清固定量。"
+        : "本次任务全部答对，能够独立完成当前练习。";
+      const weakPoints = hasMistakes ? ["应用建模"] : [];
       const structuredReport = generateStructuredReport({
         correctRate,
-        progress: "能说出 k 影响直线方向，但建模时还需要先分清固定量。",
-        weakPoints: ["应用建模"],
-        mistakeReason: studentMistakes[0]?.reason ?? "审题与建模错误",
+        progress,
+        weakPoints,
+        mistakeReason: studentMistakes[0]?.reason ?? "",
         nextTaskTitle: nextTask.title,
       });
 
       return {
         studentId,
-        progress: "能说出 k 影响直线方向，但建模时还需要先分清固定量。",
-        weakPoints: ["应用建模"],
+        progress,
+        weakPoints,
         mistakes: studentMistakes,
         activeTask,
         completionRate,
         summary: structuredReport.summary,
-        recommendationReasons: structuredReport.recommendationReasons,
+        recommendationReasons: hasMistakes ? structuredReport.recommendationReasons : [],
         nextTask,
       };
     },

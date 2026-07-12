@@ -128,4 +128,21 @@ describe("ReportPage", () => {
     expect((await screen.findAllByText(/任务状态：暂无任务状态/)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/任务状态：进行中/)).not.toBeInTheDocument();
   });
+
+  it("shows neutral copy when an all-correct report has no mistakes", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => Promise.resolve({
+      ok: true,
+      json: async () => url.startsWith("/api/reports/latest") ? {
+        studentId: "student-demo", progress: "本次全部答对。", weakPoints: [], mistakes: [],
+        activeTask: { studentId: "student-demo", taskId: "task-current", status: "completed" },
+        completionRate: 100, summary: "本次正确率 100%。", recommendationReasons: [],
+        nextTask: { id: "task-next", title: "继续挑战" },
+      } : { items: [] },
+    })));
+
+    const { container } = render(<ReportPage />);
+
+    expect(await screen.findByText("本次未发现主要错因")).toBeInTheDocument();
+    expect(container).not.toHaveTextContent("容易把固定费用和单位变化费用写反。");
+  });
 });

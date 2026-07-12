@@ -10,6 +10,18 @@ const markdownImportSchema = z.object({
 
 const reviewReasonSchema = z.object({ reason: z.string() });
 
+function transitionOrConflict<T>(reply: { code(statusCode: number): { send(payload: unknown): unknown } }, transition: () => T): T | null {
+  try {
+    return transition();
+  } catch (error) {
+    if (error instanceof Error && error.message === "invalid_review_transition") {
+      reply.code(409).send({ error: "invalid_review_transition" });
+      return null;
+    }
+    throw error;
+  }
+}
+
 export async function registerContentRoutes(app: FastifyInstance, repository: ContentRepository) {
   app.post("/admin/content/import/markdown", async (request) => {
     const body = markdownImportSchema.parse(request.body);
@@ -22,7 +34,8 @@ export async function registerContentRoutes(app: FastifyInstance, repository: Co
     const { questionId } = request.params as { questionId: string };
     const question = repository.findQuestion(questionId);
     if (!question) return reply.code(404).send({ error: "question_not_found" });
-    const approved = approveQuestion(question);
+    const approved = transitionOrConflict(reply, () => approveQuestion(question));
+    if (!approved) return;
     repository.saveQuestion(approved);
     return approved;
   });
@@ -33,7 +46,8 @@ export async function registerContentRoutes(app: FastifyInstance, repository: Co
     if (!question) return reply.code(404).send({ error: "question_not_found" });
     const parsed = reviewReasonSchema.safeParse(request.body);
     if (!parsed.success || !parsed.data.reason.trim()) return reply.code(400).send({ error: "review_reason_required" });
-    const updated = requestQuestionChanges(question, parsed.data.reason);
+    const updated = transitionOrConflict(reply, () => requestQuestionChanges(question, parsed.data.reason));
+    if (!updated) return;
     repository.saveQuestion(updated);
     return updated;
   });
@@ -44,7 +58,8 @@ export async function registerContentRoutes(app: FastifyInstance, repository: Co
     if (!question) return reply.code(404).send({ error: "question_not_found" });
     const parsed = reviewReasonSchema.safeParse(request.body);
     if (!parsed.success || !parsed.data.reason.trim()) return reply.code(400).send({ error: "review_reason_required" });
-    const updated = rejectQuestion(question, parsed.data.reason);
+    const updated = transitionOrConflict(reply, () => rejectQuestion(question, parsed.data.reason));
+    if (!updated) return;
     repository.saveQuestion(updated);
     return updated;
   });

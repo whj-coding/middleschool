@@ -1,10 +1,19 @@
 import type { FigureRecognition, Question } from "./types.js";
 
 export function approveQuestion(question: Question): Question {
-  return { ...question, reviewStatus: "approved" };
+  assertReviewable(question);
+  const { reviewReason: _reviewReason, ...withoutReason } = question;
+  return { ...withoutReason, reviewStatus: "approved" };
+}
+
+function assertReviewable(question: Question) {
+  if (question.reviewStatus !== "pending_review" && question.reviewStatus !== "needs_revision") {
+    throw new Error("invalid_review_transition");
+  }
 }
 
 function transitionQuestion(question: Question, reason: string, reviewStatus: "needs_revision" | "rejected"): Question {
+  assertReviewable(question);
   const reviewReason = reason.trim();
   if (!reviewReason) throw new Error("review_reason_required");
   return { ...question, reviewStatus, reviewReason };

@@ -50,4 +50,18 @@ describe("reviewService", () => {
       reviewReason: "题目条件错误",
     });
   });
+
+  it("rejects review transitions from terminal states", () => {
+    for (const reviewStatus of ["approved", "published", "rejected"] as const) {
+      expect(() => requestQuestionChanges({ ...question, reviewStatus }, "需修改")).toThrow("invalid_review_transition");
+      expect(() => rejectQuestion({ ...question, reviewStatus }, "拒绝")).toThrow("invalid_review_transition");
+    }
+  });
+
+  it("clears the previous review reason when approving a revision", () => {
+    expect(approveQuestion({ ...question, reviewStatus: "needs_revision", reviewReason: "旧原因" })).toEqual({
+      ...question,
+      reviewStatus: "approved",
+    });
+  });
 });

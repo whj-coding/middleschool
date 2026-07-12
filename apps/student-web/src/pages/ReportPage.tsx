@@ -18,7 +18,9 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
   const [latestReport, setLatestReport] = useState<LatestReport | null>(null);
   const progressText = latestReport?.progress ?? report.progress;
   const weakPointText = latestReport?.weakPoints.join("、") ?? report.weakPoint;
-  const mistakeReasonText = latestReport?.mistakes[0]?.reason ?? "容易把固定费用和单位变化费用写反。";
+  const mistakeReasonText = latestReport
+    ? latestReport.mistakes[0]?.reason ?? "本次未发现主要错因"
+    : "容易把固定费用和单位变化费用写反。";
   const nextTask = latestReport?.nextTask ?? { id: "task-linear-modeling", title: report.nextTask };
   const nextTaskTitle = nextTask.title;
   const taskStatusText =
