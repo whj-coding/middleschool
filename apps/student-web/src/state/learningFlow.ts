@@ -62,7 +62,7 @@ export function learningReducer(state: LearningState, action: LearningAction): L
         ...state,
         practiceAnswer: action.result.answer,
         currentPage: action.result.correct ? "report" : "mistake",
-        mistakes: action.result.correct || !action.result.mistake ? state.mistakes : [action.result.mistake],
+        mistakes: action.result.correct ? state.mistakes : [...state.mistakes, action.result.mistake],
       };
     case "openMistakeReview":
       return { ...state, currentPage: "mistake" };

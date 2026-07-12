@@ -51,4 +51,18 @@ describe("learningReducer", () => {
     expect(state.currentPage).toBe("mistake");
     expect(state.mistakes).toEqual([mistake]);
   });
+
+  it("preserves mistake history and appends the API mistake", () => {
+    const historicalMistake = { questionId: "q-old", reason: "old reason", evidence: "old evidence" };
+    const apiMistake = { questionId: "q-new", reason: "new reason", evidence: "new evidence" };
+    const initialState = { ...createInitialLearningState(), mistakes: [historicalMistake] };
+
+    const state = learningReducer(initialState, {
+      type: "submitPracticeAnswer",
+      result: { correct: false, answer: "wrong", mistake: apiMistake, activeTask: null },
+    });
+
+    expect(state.currentPage).toBe("mistake");
+    expect(state.mistakes).toEqual([historicalMistake, apiMistake]);
+  });
 });

@@ -12,7 +12,7 @@ describe("PracticePage", () => {
   it("records practice submissions against the current task", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({}),
+      json: async () => ({ correct: true, answer: "y = 3x + 0.4", activeTask: null }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -45,7 +45,7 @@ describe("PracticePage", () => {
 
       return Promise.resolve({
         ok: true,
-        json: async () => ({}),
+        json: async () => ({ correct: true, answer: "y = 3x + 0.4", activeTask: null }),
       });
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -76,7 +76,7 @@ describe("PracticePage", () => {
 
       return Promise.resolve({
         ok: true,
-        json: async () => ({}),
+        json: async () => ({ correct: true, answer: "y = 3x + 0.4", activeTask: null }),
       });
     });
     vi.stubGlobal("fetch", fetchMock);

@@ -43,4 +43,43 @@ describe("practiceApi", () => {
     expect(result.activeTask?.status).toBe("completed");
     expect(result.answer).toBe("y = 3x + 0.4");
   });
+
+  it("rejects an incorrect grading response without a mistake", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ correct: false, answer: "wrong", activeTask: null }),
+    });
+
+    await expect(
+      submitPracticeAnswer(
+        { sessionId: "practice-1", studentId: "student-demo", taskId: "task-1", questionId: "q-1", answer: "wrong" },
+        fetchMock,
+      ),
+    ).rejects.toThrow("Invalid practice submission result");
+  });
+
+  it("rejects a correct grading response containing a mistake", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        correct: true,
+        answer: "y = 0.4x + 3",
+        mistake: { questionId: "q-1", reason: "unexpected", evidence: "unexpected" },
+        activeTask: null,
+      }),
+    });
+
+    await expect(
+      submitPracticeAnswer(
+        {
+          sessionId: "practice-1",
+          studentId: "student-demo",
+          taskId: "task-1",
+          questionId: "q-1",
+          answer: "y = 0.4x + 3",
+        },
+        fetchMock,
+      ),
+    ).rejects.toThrow("Invalid practice submission result");
+  });
 });
