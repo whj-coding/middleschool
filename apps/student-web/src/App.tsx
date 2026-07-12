@@ -33,7 +33,7 @@ function createRecommendedTask(task: { id: string; title: string }): TodayTask {
 
 function App() {
   const [state, dispatch] = useReducer(learningReducer, undefined, createInitialLearningState);
-  const latestMistake = state.mistakes[0];
+  const latestMistake = state.mistakes.at(-1);
 
   async function handleStartNextTask(task: { id: string; title: string }) {
     const recommendedTask = createRecommendedTask(task);

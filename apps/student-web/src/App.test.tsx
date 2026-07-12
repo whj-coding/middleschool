@@ -5,6 +5,7 @@ import App from "./App";
 
 describe("App learning flow", () => {
   it("walks through goal, diagnostic, task, practice, mistake review, and report", async () => {
+    let answerRequestCount = 0;
     const fetchMock = vi.fn().mockImplementation((url: string) => {
       if (url.startsWith("/api/tasks/today")) {
         return Promise.resolve({
@@ -45,16 +46,24 @@ describe("App learning flow", () => {
         return Promise.resolve({ ok: true, json: async () => ({ id: "interaction-test", studentId: "student-demo" }) });
       }
       if (url.startsWith("/api/practice/practice-1/answers")) {
+        answerRequestCount += 1;
+        const mistake = answerRequestCount === 1
+          ? {
+              questionId: "practice-printing-fee",
+              reason: "审题与建模错误",
+              evidence: "学生答案 y = 3x + 0.4 混淆了固定费用和单位变化费用。",
+            }
+          : {
+              questionId: "practice-printing-fee",
+              reason: "最新 API 错因：单位变化量识别错误",
+              evidence: "最新 API 证据：第二次作答仍把每页费用写在截距位置。",
+            };
         return Promise.resolve({
           ok: true,
           json: async () => ({
             correct: false,
             answer: "y = 3x + 0.4",
-            mistake: {
-              questionId: "practice-printing-fee",
-              reason: "审题与建模错误",
-              evidence: "学生答案 y = 3x + 0.4 混淆了固定费用和单位变化费用。",
-            },
+            mistake,
             activeTask: { studentId: "student-demo", taskId: "task-linear-kb", status: "completed" },
           }),
         });
@@ -125,6 +134,8 @@ describe("App learning flow", () => {
     expect(screen.getByText("打印费建模")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "提交答案" }));
+    expect(screen.getByText("最新 API 错因：单位变化量识别错误")).toBeInTheDocument();
+    expect(screen.getByText("最新 API 证据：第二次作答仍把每页费用写在截距位置。")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "生成学情报告" }));
     await userEvent.click(screen.getByRole("button", { name: "开始复练" }));
     expect(screen.getByText("打印费建模")).toBeInTheDocument();

@@ -34,6 +34,7 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
   const completionDescription = latestReport && latestReport.mistakes.length === 0
     ? "完成本次学习任务。"
     : "完成 1 个图像探索、1 道即时练习、1 次错因复盘。";
+  const hasMistakes = latestReport ? latestReport.mistakes.length > 0 : true;
 
   useEffect(() => {
     let active = true;
@@ -85,10 +86,12 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
             <strong>主要错因</strong>
             <p>{mistakeReasonText}</p>
           </article>
-          <article>
-            <strong>错题复练</strong>
-            <p>建议先做 3 道打印费和套餐费用建模题。</p>
-          </article>
+          {hasMistakes && (
+            <article>
+              <strong>错题复练</strong>
+              <p>建议先做 3 道打印费和套餐费用建模题。</p>
+            </article>
+          )}
         </div>
 
         <div className="next-task">
