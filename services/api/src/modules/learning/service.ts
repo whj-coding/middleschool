@@ -64,12 +64,16 @@ export function createLearningService(repository: LearningRepository) {
     },
 
     getLatestReport(studentId: string) {
+      const studentAttempts = repository.listAttempts(studentId);
+      if (studentAttempts.length === 0) return null;
       const studentMistakes = repository.listMistakes(studentId);
-      if (studentMistakes.length === 0) return null;
+      const correctAttempts = studentAttempts.filter((attempt) => attempt.correct).length;
+      const correctRate = correctAttempts / studentAttempts.length;
+      const completionRate = Math.min(100, Math.max(0, Math.round(correctRate * 100)));
       const activeTask = repository.listTasks(studentId).filter((task) => task.status === "completed").at(-1) ?? null;
       const nextTask = { id: "task-linear-modeling", title: "从打印费理解固定费用和变化费用" };
       const structuredReport = generateStructuredReport({
-        correctRate: 0.5,
+        correctRate,
         progress: "能说出 k 影响直线方向，但建模时还需要先分清固定量。",
         weakPoints: ["应用建模"],
         mistakeReason: studentMistakes[0]?.reason ?? "审题与建模错误",
@@ -82,6 +86,7 @@ export function createLearningService(repository: LearningRepository) {
         weakPoints: ["应用建模"],
         mistakes: studentMistakes,
         activeTask,
+        completionRate,
         summary: structuredReport.summary,
         recommendationReasons: structuredReport.recommendationReasons,
         nextTask,

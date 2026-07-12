@@ -27,6 +27,7 @@ describe("ReportPage", () => {
                 },
               ],
               activeTask: { studentId: "student-demo", taskId: "task-linear-kb", status: "completed" },
+              completionRate: 50,
               summary: "本次正确率 50%。下一步重点放在「从打印费理解固定费用和变化费用」。",
               recommendationReasons: ["应用建模 · 需加强", "审题与建模错误 · 优先复盘"],
               nextTask: { id: "task-linear-modeling", title: "从打印费理解固定费用和变化费用" },
@@ -57,6 +58,8 @@ describe("ReportPage", () => {
     render(<ReportPage onRetryPractice={onRetryPractice} onStartNextTask={onStartNextTask} />);
 
     expect(await screen.findByText(/任务状态：已完成/)).toBeInTheDocument();
+    expect(screen.getByText("50%")).toBeInTheDocument();
+    expect(screen.queryByText("42%")).not.toBeInTheDocument();
     expect(screen.getByText(/本次正确率 50%/)).toBeInTheDocument();
     expect(screen.getByText("审题与建模错误 · 优先复盘")).toBeInTheDocument();
     expect(screen.getByText("从打印费理解固定费用和变化费用")).toBeInTheDocument();
@@ -91,6 +94,8 @@ describe("ReportPage", () => {
     render(<ReportPage />);
 
     expect((await screen.findAllByText(/任务状态：暂无任务状态/)).length).toBeGreaterThan(0);
+    expect(screen.getByText("本次已完成")).toBeInTheDocument();
+    expect(screen.queryByText("42%")).not.toBeInTheDocument();
     expect(screen.queryByText(/任务状态：进行中/)).not.toBeInTheDocument();
   });
 

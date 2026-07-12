@@ -12,6 +12,7 @@ export type LatestReport = {
     taskId: string;
     status: "started" | "completed";
   } | null;
+  completionRate?: number;
   summary: string;
   recommendationReasons: string[];
   nextTask: {

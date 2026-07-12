@@ -134,4 +134,29 @@ describe("learning service", () => {
     expect(result.answer).toBe("y = 3x + 0.4");
     expect(result.mistake?.reason).toBe("审题与建模错误");
   });
+
+  it("reports completion from persisted attempts even when every answer is correct", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-1", "y = 0.4x + 3");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.completionRate).toBe(100);
+    expect(report?.mistakes).toEqual([]);
+    expect(report?.summary).toContain("本次正确率 100%");
+  });
+
+  it("rounds the persisted correct-attempt ratio for the report", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-1", "y = 0.4x + 3");
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-2", "y = 0.4x + 3");
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-3", "y = 3x + 0.4");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.completionRate).toBe(67);
+    expect(report?.summary).toContain("本次正确率 67%");
+  });
 });
