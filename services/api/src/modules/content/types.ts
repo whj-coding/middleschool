@@ -3,6 +3,7 @@ export type ReviewStatus =
   | "recognition_failed"
   | "pending_review"
   | "needs_revision"
+  | "rejected"
   | "approved"
   | "published"
   | "unusable";
@@ -19,6 +20,7 @@ export type Question = {
   stem: string;
   explanation: string;
   reviewStatus: ReviewStatus;
+  reviewReason?: string;
 };
 
 export type FigureRecognition = {

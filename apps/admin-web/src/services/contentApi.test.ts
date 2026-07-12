@@ -6,6 +6,8 @@ import {
   fetchContentUnits,
   importMarkdownQuestion,
   publishQuestion,
+  rejectQuestion,
+  requestQuestionChanges,
 } from "./contentApi";
 
 describe("contentApi", () => {
@@ -40,6 +42,27 @@ describe("contentApi", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/admin/questions/MATH-FUNC-LINEAR-001/publish", expect.objectContaining({ method: "POST" }));
     expect(approved.reviewStatus).toBe("approved");
     expect(published.reviewStatus).toBe("published");
+  });
+
+  it("sends reasons for question revision and rejection", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "MATH-FUNC-LINEAR-001", reviewStatus: "needs_revision" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "MATH-FUNC-LINEAR-001", reviewStatus: "rejected" }), { status: 200 }));
+
+    await requestQuestionChanges("MATH-FUNC-LINEAR-001", "解析缺少关键步骤");
+    await rejectQuestion("MATH-FUNC-LINEAR-001", "题目条件错误");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/admin/questions/MATH-FUNC-LINEAR-001/request-changes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: "解析缺少关键步骤" }),
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/admin/questions/MATH-FUNC-LINEAR-001/reject", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: "题目条件错误" }),
+    });
   });
 
   it("fetches content unit package candidates", async () => {

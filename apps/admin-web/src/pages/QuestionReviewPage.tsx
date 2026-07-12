@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { reviewQueue } from "../data/mockReviewQueue";
-import { approveContentUnit, approveQuestion, fetchContentUnits, type ContentUnitSummary } from "../services/contentApi";
+import { approveContentUnit, approveQuestion, fetchContentUnits, rejectQuestion, requestQuestionChanges, type ContentUnitSummary } from "../services/contentApi";
 
 export function QuestionReviewPage({ onNext }: { onNext: () => void }) {
   const [syncStatus, setSyncStatus] = useState("待同步");
+  const [reviewReason, setReviewReason] = useState("");
   const [contentUnits, setContentUnits] = useState<ContentUnitSummary[]>([
     { id: "unit-linear-kb-concept", reviewStatus: "approved" },
   ]);
@@ -36,10 +37,21 @@ export function QuestionReviewPage({ onNext }: { onNext: () => void }) {
     try {
       const question = await approveQuestion(reviewQueue.question.id);
       setSyncStatus(`API 同步：${question.reviewStatus}`);
+      onNext();
     } catch {
-      setSyncStatus("API 未连接：使用本地审核流");
+      setSyncStatus("题目审核失败，请重试");
     }
-    onNext();
+  }
+
+  async function handleReasonedReview(action: "request-changes" | "reject") {
+    try {
+      const question = action === "request-changes"
+        ? await requestQuestionChanges(reviewQueue.question.id, reviewReason)
+        : await rejectQuestion(reviewQueue.question.id, reviewReason);
+      setSyncStatus(`API 同步：${question.reviewStatus}`);
+    } catch {
+      setSyncStatus("题目审核失败，请重试");
+    }
   }
 
   return (
@@ -84,6 +96,16 @@ export function QuestionReviewPage({ onNext }: { onNext: () => void }) {
             审核内容单元 {unit.id}
           </button>
         ))}
+      </div>
+      <div className="review-block">
+        <label htmlFor="question-review-reason">审核原因</label>
+        <textarea
+          id="question-review-reason"
+          value={reviewReason}
+          onChange={(event) => setReviewReason(event.target.value)}
+        />
+        <button type="button" disabled={!reviewReason.trim()} onClick={() => void handleReasonedReview("request-changes")}>需修改</button>
+        <button type="button" disabled={!reviewReason.trim()} onClick={() => void handleReasonedReview("reject")}>驳回</button>
       </div>
       <p className="sync-status">{syncStatus}</p>
       <button type="button" onClick={handleApprove}>题目审核通过</button>

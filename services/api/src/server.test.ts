@@ -170,4 +170,35 @@ B. y = -0.5x + 2
     expect(published.json().reviewStatus).toBe("published");
     expect(studentQuestion.json().answer).toBe("B");
   });
+
+  it("records reasoned question review transitions", async () => {
+    const app = buildServer();
+    await app.inject({ method: "POST", url: "/admin/content/import/markdown", payload: { markdown } });
+
+    const blank = await app.inject({
+      method: "POST",
+      url: "/admin/questions/MATH-FUNC-LINEAR-001/request-changes",
+      payload: { reason: "   " },
+    });
+    const requested = await app.inject({
+      method: "POST",
+      url: "/admin/questions/MATH-FUNC-LINEAR-001/request-changes",
+      payload: { reason: "  解析缺少关键步骤  " },
+    });
+    const rejected = await app.inject({
+      method: "POST",
+      url: "/admin/questions/MATH-FUNC-LINEAR-001/reject",
+      payload: { reason: "  题目条件错误  " },
+    });
+    const missing = await app.inject({
+      method: "POST",
+      url: "/admin/questions/not-found/reject",
+      payload: { reason: "无效题目" },
+    });
+
+    expect(blank.statusCode).toBe(400);
+    expect(requested.json()).toEqual(expect.objectContaining({ reviewStatus: "needs_revision", reviewReason: "解析缺少关键步骤" }));
+    expect(rejected.json()).toEqual(expect.objectContaining({ reviewStatus: "rejected", reviewReason: "题目条件错误" }));
+    expect(missing.statusCode).toBe(404);
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { approveQuestion, canExposeFigureRecognition, canPublishQuestion } from "./reviewService.js";
+import { approveQuestion, canExposeFigureRecognition, canPublishQuestion, rejectQuestion, requestQuestionChanges } from "./reviewService.js";
 import type { FigureRecognition, Question } from "./types.js";
 
 const question: Question = {
@@ -31,5 +31,23 @@ describe("reviewService", () => {
       reviewStatus: "approved",
     };
     expect(canExposeFigureRecognition(figure)).toBe(false);
+  });
+
+  it("requires and stores a trimmed reason when requesting changes", () => {
+    expect(() => requestQuestionChanges(question, "   ")).toThrow("review_reason_required");
+    expect(requestQuestionChanges(question, "  解析缺少关键步骤  ")).toEqual({
+      ...question,
+      reviewStatus: "needs_revision",
+      reviewReason: "解析缺少关键步骤",
+    });
+  });
+
+  it("requires and stores a trimmed reason when rejecting a question", () => {
+    expect(() => rejectQuestion(question, "\n\t")).toThrow("review_reason_required");
+    expect(rejectQuestion(question, "  题目条件错误  ")).toEqual({
+      ...question,
+      reviewStatus: "rejected",
+      reviewReason: "题目条件错误",
+    });
   });
 });
