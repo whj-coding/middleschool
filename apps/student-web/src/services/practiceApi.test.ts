@@ -7,6 +7,7 @@ describe("practiceApi", () => {
       ok: true,
       json: async () => ({
         correct: false,
+        answer: "y = 3x + 0.4",
         mistake: {
           questionId: "practice-printing-fee",
           reason: "审题与建模错误",
@@ -40,5 +41,6 @@ describe("practiceApi", () => {
       }),
     );
     expect(result.activeTask?.status).toBe("completed");
+    expect(result.answer).toBe("y = 3x + 0.4");
   });
 });

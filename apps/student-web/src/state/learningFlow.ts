@@ -1,4 +1,5 @@
 import type { TodayTask } from "../services/todayTaskApi";
+import type { PracticeSubmissionResult } from "../services/practiceApi";
 
 export type GoalScore = "80" | "100" | "110+" | "full-score";
 export type PageId = "goal" | "diagnostic" | "today" | "task" | "practice" | "mistake" | "report";
@@ -20,7 +21,7 @@ export type LearningAction =
   | { type: "finishInitialDiagnostic" }
   | { type: "startTask"; task: TodayTask }
   | { type: "enterPractice" }
-  | { type: "submitPracticeAnswer"; answer: string }
+  | { type: "submitPracticeAnswer"; result: PracticeSubmissionResult }
   | { type: "openMistakeReview" }
   | { type: "finishReport" }
   | { type: "startRetryPractice"; questionId: string; taskId: string | null };
@@ -59,15 +60,9 @@ export function learningReducer(state: LearningState, action: LearningAction): L
     case "submitPracticeAnswer":
       return {
         ...state,
-        practiceAnswer: action.answer,
-        currentPage: "mistake",
-        mistakes: [
-          {
-            questionId: "practice-printing-fee",
-            reason: "审题与建模错误",
-            evidence: "把基础服务费和每页费用混在一起，没有先区分固定费用和变化费用。",
-          },
-        ],
+        practiceAnswer: action.result.answer,
+        currentPage: action.result.correct ? "report" : "mistake",
+        mistakes: action.result.correct || !action.result.mistake ? state.mistakes : [action.result.mistake],
       };
     case "openMistakeReview":
       return { ...state, currentPage: "mistake" };

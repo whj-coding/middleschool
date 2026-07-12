@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { recordInteraction } from "../services/interactionApi";
-import { submitPracticeAnswer } from "../services/practiceApi";
+import { submitPracticeAnswer, type PracticeSubmissionResult } from "../services/practiceApi";
 import { transcribeVoiceThought } from "../services/voiceApi";
 
 type Props = {
-  onSubmit: () => void;
+  onSubmit: (result: PracticeSubmissionResult) => void;
   taskId: string;
   questionId?: string;
 };
@@ -24,6 +24,7 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
   const [steps, setSteps] = useState(DEFAULT_STEPS);
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [voiceStatus, setVoiceStatus] = useState<"idle" | "transcribing" | "failed">("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "failed">("idle");
 
   async function handleVoiceRetry() {
     setVoiceStatus("transcribing");
@@ -38,32 +39,33 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
 
   async function handleSubmit() {
     const studentAnswer = buildStudentAnswerEvidence(answer, steps, voiceTranscript);
-
+    setSubmitStatus("submitting");
     try {
-      await recordInteraction({
-        studentId: "student-demo",
-        taskId,
-        questionId,
-        action: "submit_answer",
-        studentAnswer,
-        hintLevel: 1,
-        correct: false,
-      });
-    } catch {
-      // Prototype continues the local learning flow when the API is unavailable.
-    }
-    try {
-      await submitPracticeAnswer({
+      const result = await submitPracticeAnswer({
         sessionId: "practice-1",
         studentId: "student-demo",
         taskId,
         questionId,
         answer,
       });
+      try {
+        await recordInteraction({
+          studentId: "student-demo",
+          taskId,
+          questionId,
+          action: "submit_answer",
+          studentAnswer,
+          hintLevel: 1,
+          correct: result.correct,
+        });
+      } catch {
+        // Grading succeeded, so interaction logging must not block the learning flow.
+      }
+      setSubmitStatus("idle");
+      onSubmit(result);
     } catch {
-      // Prototype continues the local learning flow when the API is unavailable.
+      setSubmitStatus("failed");
     }
-    onSubmit();
   }
 
   return (
@@ -106,6 +108,7 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
           </button>
         </div>
         {voiceStatus === "failed" && <p className="sync-status">语音转写暂不可用，可继续手动输入思路。</p>}
+        {submitStatus === "failed" && <p className="sync-status">提交失败，请重试。你的答案已保留。</p>}
 
         <div className="sync-status">
           <span>将记录：submit_answer</span> · questionId={questionId} · hintLevel=1
@@ -113,8 +116,8 @@ export function PracticePage({ onSubmit, taskId, questionId = "practice-printing
 
         <div className="answer-actions full">
           <button>保存思路</button>
-          <button className="primary" onClick={() => void handleSubmit()}>
-            提交答案
+          <button className="primary" onClick={() => void handleSubmit()} disabled={submitStatus === "submitting"}>
+            {submitStatus === "submitting" ? "提交中..." : "提交答案"}
           </button>
         </div>
       </div>

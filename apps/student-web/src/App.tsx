@@ -80,7 +80,7 @@ function App() {
           <PracticePage
             taskId={state.practiceTaskId ?? state.activeTaskId ?? todayTask.id}
             questionId={state.retryQuestionId ?? undefined}
-            onSubmit={() => dispatch({ type: "submitPracticeAnswer", answer: "y = 3x + 0.4" })}
+            onSubmit={(result) => dispatch({ type: "submitPracticeAnswer", result })}
           />
         )}
         {state.currentPage === "mistake" && latestMistake && (

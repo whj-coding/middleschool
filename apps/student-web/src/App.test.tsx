@@ -49,6 +49,7 @@ describe("App learning flow", () => {
           ok: true,
           json: async () => ({
             correct: false,
+            answer: "y = 3x + 0.4",
             mistake: {
               questionId: "practice-printing-fee",
               reason: "审题与建模错误",

@@ -1,6 +1,7 @@
-export type PracticeSubmission = {
+export type PracticeSubmissionResult = {
   correct: boolean;
-  mistake: {
+  answer: string;
+  mistake?: {
     questionId: string;
     reason: string;
     evidence: string;
@@ -15,7 +16,7 @@ export type PracticeSubmission = {
 export async function submitPracticeAnswer(
   input: { sessionId: string; studentId: string; taskId: string; questionId: string; answer: string },
   fetcher: typeof fetch = fetch,
-): Promise<PracticeSubmission> {
+): Promise<PracticeSubmissionResult> {
   const response = await fetcher(`/api/practice/${input.sessionId}/answers`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,5 +28,5 @@ export async function submitPracticeAnswer(
     }),
   });
   if (!response.ok) throw new Error("Failed to submit practice answer");
-  return response.json() as Promise<PracticeSubmission>;
+  return response.json() as Promise<PracticeSubmissionResult>;
 }

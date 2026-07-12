@@ -47,16 +47,20 @@ export function createLearningService(repository: LearningRepository) {
     },
 
     submitPracticeAnswer(studentId: string, taskId: string, questionId: string, answer: string) {
+      const correct = answer.replace(/\s/g, "") === "y=0.4x+3";
+      const startedTask = repository.findTask(studentId, taskId);
+      const completedTask = startedTask ? { ...startedTask, status: "completed" as const } : null;
+      repository.saveAttempt({ studentId, taskId, questionId, answer, correct });
+      if (completedTask) repository.saveTask(completedTask);
+      if (correct) return { correct, answer, activeTask: completedTask };
+
       const mistake = {
         questionId,
         reason: "审题与建模错误",
         evidence: `学生答案 ${answer} 混淆了固定费用和单位变化费用。`,
       };
-      const startedTask = repository.findTask(studentId, taskId);
-      const completedTask = startedTask ? { ...startedTask, status: "completed" as const } : null;
       repository.saveMistake(studentId, mistake);
-      if (completedTask) repository.saveTask(completedTask);
-      return { correct: false, mistake, activeTask: completedTask };
+      return { correct, answer, mistake, activeTask: completedTask };
     },
 
     getLatestReport(studentId: string) {
