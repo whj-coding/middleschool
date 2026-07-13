@@ -17,8 +17,12 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
   const [retryItems, setRetryItems] = useState<RetryPracticeItem[]>([]);
   const [latestReport, setLatestReport] = useState<LatestReport | null>(null);
   const progressText = latestReport?.progress ?? report.progress;
-  const weakPointText = latestReport?.weakPoints.join("、") ?? report.weakPoint;
-  const mistakeReasonText = latestReport?.mistakes[0]?.reason ?? "容易把固定费用和单位变化费用写反。";
+  const weakPointText = latestReport
+    ? latestReport.weakPoints.join("、") || "本次未发现明显薄弱点"
+    : report.weakPoint;
+  const mistakeReasonText = latestReport
+    ? latestReport.mistakes[0]?.reason ?? "本次未发现主要错因"
+    : "容易把固定费用和单位变化费用写反。";
   const nextTask = latestReport?.nextTask ?? { id: "task-linear-modeling", title: report.nextTask };
   const nextTaskTitle = nextTask.title;
   const taskStatusText =
@@ -26,6 +30,11 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
   const summaryText =
     latestReport?.summary ?? "你已经能看出图像上 k 和 b 的作用。下一步要把它迁移到生活建模题里，尤其是固定费用和单位变化量的识别。";
   const recommendationReasons = latestReport?.recommendationReasons ?? ["应用建模 · 需加强", "表达式结构 · 基础稳定"];
+  const completionText = latestReport?.completionRate !== undefined ? `${latestReport.completionRate}%` : "本次已完成";
+  const completionDescription = latestReport && latestReport.mistakes.length === 0
+    ? "完成本次学习任务。"
+    : "完成 1 个图像探索、1 道即时练习、1 次错因复盘。";
+  const hasMistakes = latestReport ? latestReport.mistakes.length > 0 : true;
 
   useEffect(() => {
     let active = true;
@@ -59,9 +68,9 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
         <div className="report-hero">
           <div>
             <strong>完成情况</strong>
-            <p>完成 1 个图像探索、1 道即时练习、1 次错因复盘。任务状态：{taskStatusText}</p>
+            <p>{completionDescription}任务状态：{taskStatusText}</p>
           </div>
-          <div className="report-score">42%</div>
+          <div className="report-score">{completionText}</div>
         </div>
 
         <div className="report-grid">
@@ -77,10 +86,12 @@ export function ReportPage({ onRetryPractice, onStartNextTask }: Props) {
             <strong>主要错因</strong>
             <p>{mistakeReasonText}</p>
           </article>
-          <article>
-            <strong>错题复练</strong>
-            <p>建议先做 3 道打印费和套餐费用建模题。</p>
-          </article>
+          {hasMistakes && (
+            <article>
+              <strong>错题复练</strong>
+              <p>建议先做 3 道打印费和套餐费用建模题。</p>
+            </article>
+          )}
         </div>
 
         <div className="next-task">

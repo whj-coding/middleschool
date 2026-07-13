@@ -6,6 +6,7 @@ export type StudentProfile = {
 };
 
 export type MistakeRecord = {
+  taskId: string;
   questionId: string;
   reason: string;
   evidence: string;
@@ -17,6 +18,14 @@ export type LearningTaskRecord = {
   status: "started" | "completed";
 };
 
+export type PracticeAttemptRecord = {
+  studentId: string;
+  taskId: string;
+  questionId: string;
+  answer: string;
+  correct: boolean;
+};
+
 export type LearningRepository = {
   saveProfile(profile: StudentProfile): void;
   findProfile(studentId: string): StudentProfile | undefined;
@@ -25,12 +34,15 @@ export type LearningRepository = {
   listTasks(studentId: string): LearningTaskRecord[];
   saveMistake(studentId: string, mistake: MistakeRecord): void;
   listMistakes(studentId: string): MistakeRecord[];
+  saveAttempt(attempt: PracticeAttemptRecord): void;
+  listAttempts(studentId: string): PracticeAttemptRecord[];
 };
 
 export function createInMemoryLearningRepository(): LearningRepository {
   const profiles = new Map<string, StudentProfile>();
   const tasks = new Map<string, LearningTaskRecord>();
   const mistakes = new Map<string, MistakeRecord[]>();
+  const attempts: PracticeAttemptRecord[] = [];
 
   return {
     saveProfile(profile) {
@@ -55,6 +67,12 @@ export function createInMemoryLearningRepository(): LearningRepository {
     },
     listMistakes(studentId) {
       return mistakes.get(studentId) ?? [];
+    },
+    saveAttempt(attempt) {
+      attempts.push(attempt);
+    },
+    listAttempts(studentId) {
+      return attempts.filter((attempt) => attempt.studentId === studentId);
     },
   };
 }

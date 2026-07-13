@@ -21,12 +21,14 @@ describe("ReportPage", () => {
               weakPoints: ["应用建模"],
               mistakes: [
                 {
+                  taskId: "task-linear-kb",
                   questionId: "practice-printing-fee",
                   reason: "审题与建模错误",
                   evidence: "混淆固定费用。",
                 },
               ],
               activeTask: { studentId: "student-demo", taskId: "task-linear-kb", status: "completed" },
+              completionRate: 50,
               summary: "本次正确率 50%。下一步重点放在「从打印费理解固定费用和变化费用」。",
               recommendationReasons: ["应用建模 · 需加强", "审题与建模错误 · 优先复盘"],
               nextTask: { id: "task-linear-modeling", title: "从打印费理解固定费用和变化费用" },
@@ -57,6 +59,8 @@ describe("ReportPage", () => {
     render(<ReportPage onRetryPractice={onRetryPractice} onStartNextTask={onStartNextTask} />);
 
     expect(await screen.findByText(/任务状态：已完成/)).toBeInTheDocument();
+    expect(screen.getByText("50%")).toBeInTheDocument();
+    expect(screen.queryByText("42%")).not.toBeInTheDocument();
     expect(screen.getByText(/本次正确率 50%/)).toBeInTheDocument();
     expect(screen.getByText("审题与建模错误 · 优先复盘")).toBeInTheDocument();
     expect(screen.getByText("从打印费理解固定费用和变化费用")).toBeInTheDocument();
@@ -91,6 +95,8 @@ describe("ReportPage", () => {
     render(<ReportPage />);
 
     expect((await screen.findAllByText(/任务状态：暂无任务状态/)).length).toBeGreaterThan(0);
+    expect(screen.getByText("本次已完成")).toBeInTheDocument();
+    expect(screen.queryByText("42%")).not.toBeInTheDocument();
     expect(screen.queryByText(/任务状态：进行中/)).not.toBeInTheDocument();
   });
 
@@ -122,5 +128,27 @@ describe("ReportPage", () => {
 
     expect((await screen.findAllByText(/任务状态：暂无任务状态/)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/任务状态：进行中/)).not.toBeInTheDocument();
+  });
+
+  it("shows neutral copy when an all-correct report has no mistakes", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => Promise.resolve({
+      ok: true,
+      json: async () => url.startsWith("/api/reports/latest") ? {
+        studentId: "student-demo", progress: "本次全部答对。", weakPoints: [], mistakes: [],
+        activeTask: { studentId: "student-demo", taskId: "task-current", status: "completed" },
+        completionRate: 100, summary: "本次正确率 100%。", recommendationReasons: [],
+        nextTask: { id: "task-next", title: "继续挑战" },
+      } : { items: [] },
+    })));
+
+    const { container } = render(<ReportPage />);
+
+    expect(await screen.findByText("本次未发现主要错因")).toBeInTheDocument();
+    expect(screen.getByText("本次未发现明显薄弱点")).toBeInTheDocument();
+    expect(screen.getByText(/完成本次学习任务。任务状态：已完成/)).toBeInTheDocument();
+    expect(screen.queryByText(/1次错因复盘/)).not.toBeInTheDocument();
+    expect(container).not.toHaveTextContent("错题复练");
+    expect(container).not.toHaveTextContent("建议先做 3 道打印费和套餐费用建模题。");
+    expect(container).not.toHaveTextContent("容易把固定费用和单位变化费用写反。");
   });
 });

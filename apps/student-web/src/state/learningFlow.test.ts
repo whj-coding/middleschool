@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { todayTask } from "../data/mockLearning";
 import { createInitialLearningState, learningReducer } from "./learningFlow";
+import type { PracticeSubmissionResult } from "../services/practiceApi";
 
 describe("learningReducer", () => {
   it("moves a new student through goal, diagnostic, task, practice, mistake, and report", () => {
@@ -8,7 +9,13 @@ describe("learningReducer", () => {
     state = learningReducer(state, { type: "setGoal", goalScore: "110+" });
     state = learningReducer(state, { type: "finishInitialDiagnostic" });
     state = learningReducer(state, { type: "startTask", task: todayTask });
-    state = learningReducer(state, { type: "submitPracticeAnswer", answer: "y = 0.4x + 3" });
+    const incorrectResult: PracticeSubmissionResult = {
+      correct: false,
+      answer: "y = 3x + 0.4",
+      mistake: { questionId: "practice-printing-fee", reason: "审题与建模错误", evidence: "API evidence" },
+      activeTask: null,
+    };
+    state = learningReducer(state, { type: "submitPracticeAnswer", result: incorrectResult });
     state = learningReducer(state, { type: "openMistakeReview" });
     state = learningReducer(state, { type: "finishReport" });
     state = learningReducer(state, { type: "startRetryPractice", questionId: "practice-printing-fee", taskId: "task-linear-kb" });
@@ -21,5 +28,41 @@ describe("learningReducer", () => {
     expect(state.retryQuestionId).toBe("practice-printing-fee");
     expect(state.mistakes[0].reason).toBe("审题与建模错误");
     expect(state.nextTaskId).toBe("task-linear-modeling");
+  });
+
+  it("moves a correct result directly to report without adding a mistake", () => {
+    const state = learningReducer(createInitialLearningState(), {
+      type: "submitPracticeAnswer",
+      result: { correct: true, answer: "y = 0.4x + 3", activeTask: null },
+    });
+
+    expect(state.currentPage).toBe("report");
+    expect(state.practiceAnswer).toBe("y = 0.4x + 3");
+    expect(state.mistakes).toEqual([]);
+  });
+
+  it("uses exactly the API mistake for an incorrect result", () => {
+    const mistake = { questionId: "q-api", reason: "API reason", evidence: "API evidence" };
+    const state = learningReducer(createInitialLearningState(), {
+      type: "submitPracticeAnswer",
+      result: { correct: false, answer: "wrong", mistake, activeTask: null },
+    });
+
+    expect(state.currentPage).toBe("mistake");
+    expect(state.mistakes).toEqual([mistake]);
+  });
+
+  it("preserves mistake history and appends the API mistake", () => {
+    const historicalMistake = { questionId: "q-old", reason: "old reason", evidence: "old evidence" };
+    const apiMistake = { questionId: "q-new", reason: "new reason", evidence: "new evidence" };
+    const initialState = { ...createInitialLearningState(), mistakes: [historicalMistake] };
+
+    const state = learningReducer(initialState, {
+      type: "submitPracticeAnswer",
+      result: { correct: false, answer: "wrong", mistake: apiMistake, activeTask: null },
+    });
+
+    expect(state.currentPage).toBe("mistake");
+    expect(state.mistakes).toEqual([historicalMistake, apiMistake]);
   });
 });

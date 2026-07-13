@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { ContentFigure } from "./ContentFigure";
+import { isSafeContentFigureSrc } from "./contentFigurePolicy";
+import { MathExpression } from "./MathExpression";
 
 type Props = {
   markdown: string;
@@ -11,15 +14,11 @@ type Block =
   | { type: "math"; expression: string }
   | { type: "image"; alt: string; src: string };
 
-function isSafeImageSrc(src: string) {
-  return (src.startsWith("/") && !src.startsWith("//")) || src.startsWith("./") || src.startsWith("images/");
-}
-
 function parseImage(line: string) {
   const match = line.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
   if (!match) return null;
   const [, alt, src] = match;
-  if (!isSafeImageSrc(src)) return null;
+  if (!isSafeContentFigureSrc(src)) return null;
   return { alt, src };
 }
 
@@ -130,11 +129,7 @@ function renderInline(text: string): ReactNode[] {
     } else if (token.startsWith("**")) {
       nodes.push(<strong key={key}>{token.slice(2, -2)}</strong>);
     } else {
-      nodes.push(
-        <span className="math-inline" key={key} aria-label={`公式 ${token.slice(1, -1)}`}>
-          {token.slice(1, -1)}
-        </span>,
-      );
+      nodes.push(<MathExpression expression={token.slice(1, -1)} displayMode={false} key={key} />);
     }
 
     cursor = match.index + token.length;
@@ -166,15 +161,11 @@ export function ControlledContentRenderer({ markdown }: Props) {
         }
 
         if (block.type === "math") {
-          return (
-            <div className="math-block" key={index} aria-label={`公式 ${block.expression}`}>
-              {block.expression}
-            </div>
-          );
+          return <MathExpression expression={block.expression} displayMode key={index} />;
         }
 
         if (block.type === "image") {
-          return <img className="content-figure" key={index} src={block.src} alt={block.alt} loading="lazy" />;
+          return <ContentFigure key={index} src={block.src} alt={block.alt} />;
         }
 
         return <p key={index}>{renderInline(block.text)}</p>;

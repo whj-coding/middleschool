@@ -1,6 +1,7 @@
 type ContentQuestion = {
   id: string;
-  reviewStatus: "pending_review" | "approved" | "published";
+  reviewStatus: "pending_review" | "needs_revision" | "approved" | "rejected" | "published";
+  reviewReason?: string;
 };
 
 export type ContentUnitPackage = {
@@ -35,6 +36,23 @@ export async function approveQuestion(questionId: string) {
     method: "POST",
   });
   return readJson<ContentQuestion>(response);
+}
+
+async function transitionQuestion(questionId: string, action: "request-changes" | "reject", reason: string) {
+  const response = await fetch(`/api/admin/questions/${questionId}/${action}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason }),
+  });
+  return readJson<ContentQuestion>(response);
+}
+
+export function requestQuestionChanges(questionId: string, reason: string) {
+  return transitionQuestion(questionId, "request-changes", reason);
+}
+
+export function rejectQuestion(questionId: string, reason: string) {
+  return transitionQuestion(questionId, "reject", reason);
 }
 
 export async function publishQuestion(questionId: string) {

@@ -77,6 +77,17 @@ describe("data pipeline routes", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toHaveProperty("units");
+    expect(response.json().units).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "unit-linear-kb-concept",
+          contentMarkdown: expect.stringContaining("$y = kx + b$"),
+        }),
+      ]),
+    );
+    expect(response.json().units[0].contentMarkdown).toContain(
+      "![一次函数图像](/images/content/linear-kb-concept.png)",
+    );
   });
 
   it("lists and approves content units before package composition", async () => {

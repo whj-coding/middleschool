@@ -13,17 +13,19 @@ function readSection(markdown: string, heading: string) {
 }
 
 export function parseMarkdownQuestion(markdown: string): Question {
+  const normalizedMarkdown = markdown.replace(/\r\n?/g, "\n");
+
   return {
-    id: readField(markdown, "# 题目ID"),
+    id: readField(normalizedMarkdown, "# 题目ID"),
     subject: "数学",
     module: "函数",
-    knowledgePoint: readField(markdown, "知识点"),
-    questionType: readField(markdown, "题型") as Question["questionType"],
-    difficulty: readField(markdown, "难度") as Question["difficulty"],
-    ability: readField(markdown, "能力类型") as Question["ability"],
-    answer: readField(markdown, "答案"),
-    stem: readSection(markdown, "题干"),
-    explanation: readSection(markdown, "解析"),
+    knowledgePoint: readField(normalizedMarkdown, "知识点"),
+    questionType: readField(normalizedMarkdown, "题型") as Question["questionType"],
+    difficulty: readField(normalizedMarkdown, "难度") as Question["difficulty"],
+    ability: readField(normalizedMarkdown, "能力类型") as Question["ability"],
+    answer: readField(normalizedMarkdown, "答案"),
+    stem: readSection(normalizedMarkdown, "题干"),
+    explanation: readSection(normalizedMarkdown, "解析"),
     reviewStatus: "pending_review",
   };
 }

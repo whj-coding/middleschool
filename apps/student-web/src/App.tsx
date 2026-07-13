@@ -1,4 +1,5 @@
 import { useReducer } from "react";
+import "katex/dist/katex.min.css";
 import { todayTask } from "./data/mockLearning";
 import { GoalSetupPage } from "./pages/GoalSetupPage";
 import { InitialDiagnosticPage } from "./pages/InitialDiagnosticPage";
@@ -32,7 +33,7 @@ function createRecommendedTask(task: { id: string; title: string }): TodayTask {
 
 function App() {
   const [state, dispatch] = useReducer(learningReducer, undefined, createInitialLearningState);
-  const latestMistake = state.mistakes[0];
+  const latestMistake = state.mistakes.at(-1);
 
   async function handleStartNextTask(task: { id: string; title: string }) {
     const recommendedTask = createRecommendedTask(task);
@@ -79,7 +80,7 @@ function App() {
           <PracticePage
             taskId={state.practiceTaskId ?? state.activeTaskId ?? todayTask.id}
             questionId={state.retryQuestionId ?? undefined}
-            onSubmit={() => dispatch({ type: "submitPracticeAnswer", answer: "y = 3x + 0.4" })}
+            onSubmit={(result) => dispatch({ type: "submitPracticeAnswer", result })}
           />
         )}
         {state.currentPage === "mistake" && latestMistake && (

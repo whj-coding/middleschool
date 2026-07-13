@@ -24,7 +24,8 @@ describe("learning service", () => {
       ability: "概念",
     });
     expect(startedTask.status).toBe("started");
-    expect(result.mistake.reason).toBe("审题与建模错误");
+    expect(result.mistake?.reason).toBe("审题与建模错误");
+    expect(result.mistake?.taskId).toBe(task.id);
     expect(result.activeTask?.status).toBe("completed");
     if (!report) throw new Error("expected report after practice submission");
     expect(report.activeTask?.status).toBe("completed");
@@ -89,5 +90,116 @@ describe("learning service", () => {
       taskId: "task-completed",
       status: "completed",
     });
+  });
+
+  it("grades the known expression and records the real attempt", () => {
+    const repository = createInMemoryLearningRepository();
+    const service = createLearningService(repository);
+    service.startTask("student-1", "task-linear-kb");
+
+    const result = service.submitPracticeAnswer(
+      "student-1",
+      "task-linear-kb",
+      "practice-printing-fee",
+      "y = 0.4x + 3",
+    );
+
+    expect(result).toEqual({
+      correct: true,
+      answer: "y = 0.4x + 3",
+      activeTask: { studentId: "student-1", taskId: "task-linear-kb", status: "completed" },
+    });
+    expect(repository.listAttempts("student-1")).toEqual([
+      {
+        studentId: "student-1",
+        taskId: "task-linear-kb",
+        questionId: "practice-printing-fee",
+        answer: "y = 0.4x + 3",
+        correct: true,
+      },
+    ]);
+    expect(repository.listMistakes("student-1")).toEqual([]);
+  });
+
+  it("returns the submitted answer and classified mistake for an incorrect expression", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    const result = service.submitPracticeAnswer(
+      "student-1",
+      "task-linear-kb",
+      "practice-printing-fee",
+      "y = 3x + 0.4",
+    );
+
+    expect(result.correct).toBe(false);
+    expect(result.answer).toBe("y = 3x + 0.4");
+    expect(result.mistake?.reason).toBe("审题与建模错误");
+  });
+
+  it("reports completion from persisted attempts even when every answer is correct", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-1", "y = 0.4x + 3");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.completionRate).toBe(100);
+    expect(report?.mistakes).toEqual([]);
+    expect(report?.summary).toContain("本次正确率 100%");
+  });
+
+  it("rounds the persisted correct-attempt ratio for the report", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-1", "y = 0.4x + 3");
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-2", "y = 0.4x + 3");
+    service.submitPracticeAnswer("student-1", "task-linear-kb", "question-3", "y = 3x + 0.4");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.completionRate).toBe(67);
+    expect(report?.summary).toContain("本次正确率 67%");
+  });
+
+  it("calculates the latest report only from attempts for its active task", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+    service.startTask("student-1", "task-old");
+    service.submitPracticeAnswer("student-1", "task-old", "old-1", "y = 3x + 0.4");
+    service.startTask("student-1", "task-current");
+    service.submitPracticeAnswer("student-1", "task-current", "current-1", "y = 0.4x + 3");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.activeTask?.taskId).toBe("task-current");
+    expect(report?.completionRate).toBe(100);
+    expect(report?.summary).toContain("本次正确率 100%");
+  });
+
+  it("does not invent weak points or mistakes for an all-correct task", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+    service.startTask("student-1", "task-current");
+    service.submitPracticeAnswer("student-1", "task-current", "current-1", "y = 0.4x + 3");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.weakPoints).toEqual([]);
+    expect(report?.mistakes).toEqual([]);
+    expect(report?.recommendationReasons).not.toContain("审题与建模错误 · 优先复盘");
+  });
+
+  it("keeps mistakes with the same question id isolated to their task", () => {
+    const service = createLearningService(createInMemoryLearningRepository());
+
+    service.startTask("student-1", "task-old");
+    service.submitPracticeAnswer("student-1", "task-old", "shared-question", "y = 3x + 0.4");
+    service.startTask("student-1", "task-current");
+    service.submitPracticeAnswer("student-1", "task-current", "shared-question", "y = 3x + 0.4");
+
+    const report = service.getLatestReport("student-1");
+
+    expect(report?.activeTask?.taskId).toBe("task-current");
+    expect(report?.mistakes).toEqual([
+      expect.objectContaining({ taskId: "task-current", questionId: "shared-question" }),
+    ]);
   });
 });
